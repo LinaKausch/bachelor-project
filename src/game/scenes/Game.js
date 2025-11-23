@@ -1,28 +1,63 @@
 import { Scene } from 'phaser';
+import Player from '../prefabs/player.js';
+import Npc from '../prefabs/npc.js';
+import Timer from '../utils/Timer.js';
+import Wand from '../prefabs/wand.js';
+import Counter from '../utils/Counter.js';
 
-export class Game extends Scene
-{
-    constructor ()
-    {
+export class Game extends Scene {
+    constructor() {
         super('Game');
     }
 
-    create ()
-    {
-        this.cameras.main.setBackgroundColor(0x00ff00);
+    create() {
+        // PLAYER
+        this.player = new Player(this);
 
-        this.add.image(512, 384, 'background').setAlpha(0.5);
+        // NPC
+        this.npcs = [];
 
-        this.add.text(512, 384, 'Make something fun!\nand share it with us:\nsupport@phaser.io', {
-            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
-            align: 'center'
-        }).setOrigin(0.5);
+        for (let i = 0; i < 20; i++) {
+            const npc = new Npc(
+                this,
+                Phaser.Math.Between(100, this.scale.width - 100),
+                Phaser.Math.Between(100, this.scale.height - 100)
+            )
+            this.npcs.push(npc);
+        }
 
-        this.input.once('pointerdown', () => {
+        //TARGET
+        this.wand = new Wand(this);
 
-            this.scene.start('GameOver');
+        // TIMER
+        this.timer = new Timer(120);
+        this.timer.start();
+        this.timer.onComplete = () => {
+            console.log('Time is up!');
+        }
 
-        });
+        //COUNTER
+        this.creatureCounter = new Counter(2);
+
+    }
+
+    findCreature() {
+        this.creatureCounter.add();
+        console.log('Found:', this.creatureCounter.get());
+    }
+
+    update(time, delta) {
+        const dt = delta / 1000;
+
+        this.player.update(time, delta);
+
+        this.npcs.forEach(npc =>
+            npc.update(dt, this.scale.width, this.scale.height)
+        )
+
+        this.timer.update(dt);
+        // console.log(this.timer.getTimeLeft());
+
+        this.wand.update(this.input.activePointer);
     }
 }
