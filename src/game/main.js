@@ -1,7 +1,11 @@
 import { Boot } from './scenes/Boot';
 import { Game as MainGame } from './scenes/Game';
 import { GameOver } from './scenes/GameOver';
-import { MainMenu } from './scenes/MainMenu';
+import { Idle } from './scenes/Idle';
+import {Players} from './scenes/Players';
+import {AnimationOne} from './scenes/AnimationOne';
+import {Potions} from './scenes/Potions';
+import {AnimationTwo} from './scenes/AnimationTwo';
 import { Preloader } from './scenes/Preloader';
 import { AUTO, Game } from 'phaser';
 
@@ -20,7 +24,11 @@ const config = {
     scene: [
         Boot,
         Preloader,
-        MainMenu,
+        Idle,
+        Players,
+        AnimationOne,
+        Potions,
+        AnimationTwo,
         MainGame,
         GameOver
     ]

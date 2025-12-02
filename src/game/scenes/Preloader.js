@@ -32,6 +32,12 @@ export class Preloader extends Scene
         //  Load the assets for the game - Replace with your own assets
         this.load.setPath('assets');
         this.load.image('npc', 'creature.png');
+        this.load.spritesheet('fly', 'creature-ss.png', {
+            frameWidth: 840, 
+            frameHeight: 1008   
+        });
+
+        this.load.image('spark', 'spark.png');
     }
 
     create ()

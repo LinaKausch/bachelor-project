@@ -1,5 +1,5 @@
 export default class Timer {
-    consturctor(duration = 60) {
+    constructor(duration = 60) {
         this.duration = duration;
         this.elapsed = 0;
         this.running = false;
@@ -27,3 +27,4 @@ export default class Timer {
         return Math.max(this.duration - this.elapsed, 0);
     }
 }
+

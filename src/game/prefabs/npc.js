@@ -2,10 +2,12 @@ import { GameObjects } from 'phaser';
 
 export default class Npc extends GameObjects.Sprite {
     constructor(scene, x, y) {
-        super(scene, x, y, 'npc');
+        super(scene, x, y, 'fly');
         scene.add.existing(this);
 
-        this.setScale(0.06);
+        this.anims.play('fly-idle');
+
+        this.setScale(0.16);
 
         this.target = new Phaser.Math.Vector2(
             Phaser.Math.Between(80, scene.scale.width - 80),
@@ -49,7 +51,7 @@ export default class Npc extends GameObjects.Sprite {
         }
 
         toTarget.normalize();
-        this.velocity.lerp(toTarget.scale(200), 0.02);
+        this.velocity.lerp(toTarget.scale(400), 0.02);
 
         this.x += this.velocity.x * dt;
         this.baseY += this.velocity.y * dt;
@@ -57,8 +59,23 @@ export default class Npc extends GameObjects.Sprite {
         this.floatPhase += this.floatSpeed * dt;
         this.y = this.baseY + Math.sin(this.floatPhase) * this.floatAmplitude;
 
+
+        if (this.velocity.x > 0) {
+            if (this.anims.currentAnim?.key !== 'fly-right') {
+                this.anims.play('fly-right', true);
+            }
+        } else if (this.velocity.x < 0) {
+            if (this.anims.currentAnim?.key !== 'fly-left') {
+                this.anims.play('fly-left', true);
+            }
+        } else {
+            if (this.anims.currentAnim?.key !== 'fly-idle') {
+                this.anims.play('fly-idle', true);
+            }
+        }
         this.x = Phaser.Math.Clamp(this.x, 0, screenWidth);
         this.y = Phaser.Math.Clamp(this.y, 0, screenHeight);
+
 
     }
 }
