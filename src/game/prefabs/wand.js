@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { Input } from '../utils/Input.js';
 
 export default class Wand extends Phaser.GameObjects.Graphics {
     constructor(scene) {
@@ -10,7 +11,9 @@ export default class Wand extends Phaser.GameObjects.Graphics {
         this.radius = 20;
         this.lineStyle(3, 0xBDB9FA);
         this.strokeCircle(this.x, this.y, this.radius);
-
+        this.setDepth(1);
+        this.lastShot = 0;
+        this.shootDelay = 200;
 
         //PARTICLE
         // const g = scene.add.graphics();
@@ -36,45 +39,54 @@ export default class Wand extends Phaser.GameObjects.Graphics {
             angle: { min: 0, max: 360 },
             blendMode: 'SCREEN',
         });
+        this.particles.setDepth(2);
 
         // scene.input.on('pointerdown', () => {
         //     this.particles.explode(100, this.x, this.y);
         // });
     }
 
-    update(pointer) {
-        // this.x = pointer.worldX;
-        // this.y = pointer.worldY;
+    update(time, delta) {
 
-        const accX = this.scene.accX;
-        const accY = this.scene.accY;
-        const z = this.scene.zButton;
+        const accX = Input.accX;
+        const accY = Input.accY;
+        const z = Input.z;
 
+        // console.log(Input.zButton);
 
         if (accX !== undefined && accY !== undefined) {
-            // const sensitivity = 0.2;
-            const smooth = 0.12;
+            const smooth = 0.10;
 
-            let targetX = Phaser.Math.Linear(0, this.scene.scale.width, accX / 255);
-            let targetY = Phaser.Math.Linear(0, this.scene.scale.height, accY / 255);
+            const MIN = 80;
+            const MAX = 180;
+
+
+            const clampedX = Phaser.Math.Clamp(accX, MIN, MAX);
+            const clampedY = Phaser.Math.Clamp(accY, MIN, MAX);
+
+            const normX = (clampedX - MIN) / (MAX - MIN);
+            const normY = (clampedY - MIN) / (MAX - MIN);
+
+            let targetX = normX * this.scene.scale.width;
+            let targetY = normY * this.scene.scale.height;
+            // let targetX = Phaser.Math.Linear(0, this.scene.scale.width, accX / 255);
+            // let targetY = Phaser.Math.Linear(0, this.scene.scale.height, accY / 255);
 
             this.x = Phaser.Math.Linear(this.x, targetX, smooth);
             this.y = Phaser.Math.Linear(this.y, targetY, smooth);
-            // const centerX = 128;
-            // const centerY = 128;
 
-            // let dx = (accX - centerX) * sensitivity;
-            // let dy = (accY - centerY) * sensitivity;
-
-            // this.x += dx;
-            // this.y += dy;
 
             this.x = Phaser.Math.Clamp(this.x, 0, this.scene.scale.width);
             this.y = Phaser.Math.Clamp(this.y, 0, this.scene.scale.height);
         }
 
-        if (z === 1) {
-            this.particles.explode(100, this.x, this.y);
+
+        // if (z === 1) {
+        //     this.particles.explode(100, this.x, this.y);
+        // }
+        if (z === 1 && time > this.lastShot + this.shootDelay) {
+            this.particles.explode(60, this.x, this.y);
+            this.lastShot = time;
         }
     }
 }

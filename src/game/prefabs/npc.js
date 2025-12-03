@@ -64,7 +64,6 @@ export default class Npc extends GameObjects.Sprite {
         )
 
         if (Phaser.Math.Distance.Between(this.x, this.y, this.target.x, this.target.y) < 40) {
-            // this.justPickedTarget = true;
             this.target.set(
                 Phaser.Math.Between(padding, screenWidth - padding),
                 Phaser.Math.Between(padding, screenHeight - padding)

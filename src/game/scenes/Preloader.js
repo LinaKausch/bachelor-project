@@ -38,6 +38,11 @@ export class Preloader extends Scene
         });
 
         this.load.image('spark', 'spark.png');
+        this.load.image('glow', 'potions-glow.png');
+        this.load.image('grow', 'potions-grow.png');
+        this.load.image('colour', 'potions-colour.png');
+        this.load.image('trace', 'potions-trace.png');
+
     }
 
     create ()
@@ -46,6 +51,6 @@ export class Preloader extends Scene
         //  For example, you can define global animations here, so we can use them in other scenes.
 
         //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-        this.scene.start('Players');
+        this.scene.start('Potions');
     }
 }

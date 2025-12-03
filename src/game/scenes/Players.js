@@ -26,7 +26,7 @@ export class Players extends Scene {
         }).setOrigin(0.5);
 
         y += 200;
-        this.startButton = this.add.text(
+        this.twoPlayersBtn = this.add.text(
             centerX - 200,
             y,
             "2 PLAYERS",
@@ -42,7 +42,7 @@ export class Players extends Scene {
                 this.scene.start('Players');
             });
 
-        this.startButton = this.add.text(
+        this.threePlayersBtn = this.add.text(
             centerX + 200,
             y,
             "3 PLAYERS",

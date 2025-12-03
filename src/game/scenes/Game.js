@@ -7,55 +7,68 @@ import Counter from '../utils/Counter.js';
 import { creatureAnimation } from '../utils/CreatureAnimation.js';
 import { traceOn, traceOff } from '../powers/Trace.js';
 import { glowOn, glowOff } from '../powers/Glow.js';
-import {growOn, growOff} from '../powers/Grow.js';
-import {colorOn, colorOff} from '../powers/Color.js';
+import { growOn, growOff } from '../powers/Grow.js';
+import { colorOn, colorOff } from '../powers/Color.js';
+import { Input } from '../utils/Input.js';
+import { ChosenPowers } from "../utils/ChosenPowers.js";
+
 
 let port;
 let reader;
 
-const connectArduino = async (scene) => {
-    port = await navigator.serial.requestPort();
-    await port.open({ baudRate: 9600 });
+// window.connectArduino = async () => {
+//     port = await navigator.serial.requestPort();
+//     await port.open({ baudRate: 9600 });
 
-    const textDecoder = new TextDecoderStream();
-    port.readable.pipeTo(textDecoder.writable);
-    reader = textDecoder.readable.getReader();
+//     const textDecoder = new TextDecoderStream();
+//     port.readable.pipeTo(textDecoder.writable);
+//     reader = textDecoder.readable.getReader();
 
-    console.log("Connected! Waiting for data...");
-    let buffer = '';
+//     console.log("Connected! Waiting for data...");
+//     let buffer = '';
 
-    while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
+//     while (true) {
+//         const { value, done } = await reader.read();
+//         if (done) break;
 
-        buffer += value;
-        let lines = buffer.split('\n');
-        buffer = lines.pop();
+//         buffer += value;
+//         let lines = buffer.split('\n');
+//         buffer = lines.pop();
 
-        for (let line of lines) {
-            line = line.trim();
-            if (line.startsWith("{")) {
-                try {
-                    const data = JSON.parse(line);
-                    scene.joystickDir1 = data.p1;
-                    scene.joystickDir2 = data.p2;
+//         for (let line of lines) {
+//             line = line.trim();
+//             if (line.startsWith("{")) {
+//                 try {
+//                     const data = JSON.parse(line);
+//                     console.log("JSON:", data);
 
-                    if (data.btn1 !== undefined) scene.blueBtn = data.btn1;
-                    if (data.btn2 !== undefined) scene.yellowBtn = data.btn2;
+//                     // scene.joystickDir1 = data.p1;
+//                     // scene.joystickDir2 = data.p2;
 
-                    scene.accX = data.accX;
-                    scene.accY = data.accY;
-                    scene.zButton = data.z;
+//                     // if (data.btn1 !== undefined) scene.blueBtn = data.btn1;
+//                     // if (data.btn2 !== undefined) scene.yellowBtn = data.btn2;
 
-                } catch (e) {
-                    console.warn("Bad JSON:", line);
-                }
-            }
+//                     // scene.accX = data.accX;
+//                     // scene.accY = data.accY;
+//                     // scene.zButton = data.z;
+//                     window.joy1 = data.p1;
+//                     window.joy2 = data.p2;
+//                     window.btn1 = data.btn1;
+//                     window.btn2 = data.btn2;
+//                     window.accX = data.accX;
+//                     window.accY = data.accY;
+//                     window.zButton = data.z;
 
-        }
-    }
 
-};
+//                 } catch (e) {
+//                     console.warn("Bad JSON:", line);
+//                 }
+//             }
+
+//         }
+//     }
+
+// }
 
 export class Game extends Scene {
     constructor() {
@@ -78,31 +91,21 @@ export class Game extends Scene {
         this.player1 = new Player(this, 200, 200);
 
         this.player1.setInteractive();
-
-        // this.player1.on('pointerdown', () => {
-        //     this.poof(this.player1.x, this.player1.y);
-        //     this.player1.setVisible(false);
-        // });
-
         this.joystickDir1 = "none";
-        this.joystickDir2 = "none";
-
-        this.blueBtn = 0;  
-        this.yellowBtn = 0;
-
+        this.blueBtn = 0;
         this.prevBlue = 0;
-        this.prevYellow = 0;
 
         //PLAYER 2
-
         this.player2 = new Player(this, 300, 300);
 
         this.player2.setInteractive();
+        this.joystickDir2 = "none";
+        this.yellowBtn = 0;
+        this.prevYellow = 0;
 
-        // this.player2.on('pointerdown', () => {
-        //     this.poof(this.player2.x, this.player2.y);
-        //     this.player2.setVisible(false);
-        // });
+        this.applyChosenPower(this.player1, ChosenPowers.p1);
+        this.applyChosenPower(this.player2, ChosenPowers.p2);
+
 
         this.keys = this.input.keyboard.addKeys({
             enter: Phaser.Input.Keyboard.KeyCodes.ENTER,
@@ -126,7 +129,7 @@ export class Game extends Scene {
                     player._isOnCooldown = false;
                 });
             });
-        };
+        }
 
 
         this.emitter = this.add.particles(0, 0, 'particle', {
@@ -136,8 +139,8 @@ export class Game extends Scene {
             quantity: 0
         });
 
-        growOn(this.player1);
-        glowOn(this.player2);
+        // growOn(this.player1);
+        // glowOn(this.player2);
 
 
         // NPC
@@ -177,15 +180,6 @@ export class Game extends Scene {
             color: "#ffffff"
         });
 
-        this.input.once("pointerdown", async () => {
-            try {
-                await connectArduino(this);
-                console.log("Joystick connected!");
-            } catch (err) {
-                console.error("Failed to connect:", err);
-            }
-        });
-
     }
 
     checkWandHit(player) {
@@ -195,7 +189,17 @@ export class Game extends Scene {
 
     poof(x, y) {
         this.emitter.explode(20, x, y);
+        // const fx = this.postFX.addGlow(0x66ffcc, 1, 2, 2);
+        //     this.tweens.add({
+        //         targets: fx,
+        //         outerStrength: 1.0,
+        //         duration: 500,
+        //         yoyo: true,
+        //         repeat: -1
+        //     });
     }
+
+
 
     findCreature() {
         this.creatureCounter.add();
@@ -205,23 +209,23 @@ export class Game extends Scene {
     update(time, delta) {
         const dt = delta / 1000;
 
-        // if (Phaser.Input.Keyboard.JustDown(this.keys.enter)) {
-        //     this.tempOff(this.player1, growOff, growOn, 10, 10);
-        // }
-
-        // if (Phaser.Input.Keyboard.JustDown(this.keys.space)) {
-        //     this.tempOff(this.player2, glowOff, glowOn, 10, 10);
-        // }
+        this.joystickDir1 = Input.joy1;
+        this.joystickDir2 = Input.joy2;
+        this.blueBtn = Input.btn1;
+        this.yellowBtn = Input.btn2;
+        this.zButton = Input.z;
 
         if (this.blueBtn === 1 && this.prevBlue === 0) {
-            this.tempOff(this.player1, growOff, growOn, 10, 10);
+            const power = this.getPower(ChosenPowers.p1);
+            if (power) this.tempOff(this.player1, power.off, power.on, 10, 10);
         }
         if (this.yellowBtn === 1 && this.prevYellow === 0) {
-            this.tempOff(this.player2, glowOff, glowOn, 10, 10);
+            const power = this.getPower(ChosenPowers.p2);
+            if (power) this.tempOff(this.player2, power.off, power.on, 10, 10);
         }
         this.prevBlue = this.blueBtn;
         this.prevYellow = this.yellowBtn;
-     
+
 
         if (this.gameOn) {
             this.player1.setDirection(this.joystickDir1);
@@ -232,15 +236,15 @@ export class Game extends Scene {
         this.player2.update(time, delta);
 
 
-            if (this.player1.visible && this.checkWandHit(this.player1) && this.zButton === 1) {
-                this.poof(this.player1.x, this.player1.y);
-                this.player1.setVisible(false);
-            }
+        if (this.player1.visible && this.checkWandHit(this.player1) && this.zButton === 1) {
+            this.poof(this.player1.x, this.player1.y);
+            this.player1.setVisible(false);
+        }
 
         if (this.player2.visible && this.checkWandHit(this.player2) && this.zButton === 1) {
-                this.poof(this.player2.x, this.player2.y);
-                this.player2.setVisible(false);
-            }
+            this.poof(this.player2.x, this.player2.y);
+            this.player2.setVisible(false);
+        }
 
         this.npcs.forEach(npc =>
             npc.update(dt, this.scale.width, this.scale.height)
@@ -250,8 +254,38 @@ export class Game extends Scene {
         const timeLeft = Math.ceil(this.timer.getTimeLeft());
         this.timerText.setText("Time: " + timeLeft);
 
-        this.wand.update(this.input.activePointer);
+        this.wand.update(time, delta);
 
         this.counterText.setText(`Found: ${this.creatureCounter.get()} / ${this.creatureCounter.max}`);
     }
+
+    applyChosenPower(player, potionIndex) {
+        if (potionIndex === null) return;
+
+        glowOff(player);
+        growOff(player);
+        traceOff(player);
+        colorOff(player);
+
+        switch (potionIndex) {
+            case 0: glowOn(player); break;
+            case 1: growOn(player); break;
+            case 2: traceOn(player); break;
+            case 3: colorOn(player); break;
+        }
+    }
+
+    getPower(index) {
+        switch (index) {
+            case 0: return { on: glowOn, off: glowOff };
+            case 1: return { on: growOn, off: growOff };
+            case 2: return { on: traceOn, off: traceOff };
+            case 3: return { on: colorOn, off: colorOff };
+            default: return null;
+        }
+    }
+
+
+
+
 }
