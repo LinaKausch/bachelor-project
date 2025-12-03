@@ -24,13 +24,34 @@ export default class Npc extends GameObjects.Sprite {
 
 
         this.floatPhase = Phaser.Math.FloatBetween(0, Math.PI * 2);
-        this.floatSpeed = Phaser.Math.FloatBetween(1.5, 2.5);
+        this.floatSpeed = Phaser.Math.FloatBetween(2, 3);
         this.floatAmplitude = Phaser.Math.FloatBetween(5, 15);
         this.baseY = this.y;
+        this.rest = false;
+        this.testTimer = 0;
+        this.restDuration = Phaser.Math.FloatBetween(0.5, 2);
     }
 
     update(dt, screenWidth, screenHeight) {
         const padding = 80;
+
+        if (this.rest) {
+            this.restTimer -= dt;
+
+            this.floatPhase += this.floatSpeed * dt;
+            this.y = this.baseY + Math.sin(this.floatPhase) * this.floatAmplitude;
+
+            if (this.anims.currentAnim?.key !== 'fly-idle') {
+                this.anims.play('fly-idle', true);
+            }
+
+            if (this.restTimer <= 0) {
+                this.rest = false;
+            }
+
+            return;
+        }
+
         this.wanderTimer -= dt;
         if (this.wanderTimer <= 0) {
             this.velocity.rotate(Phaser.Math.FloatBetween(-Math.PI / 6, Math.PI / 6));
@@ -48,6 +69,13 @@ export default class Npc extends GameObjects.Sprite {
                 Phaser.Math.Between(padding, screenWidth - padding),
                 Phaser.Math.Between(padding, screenHeight - padding)
             );
+        }
+
+        if (Phaser.Math.FloatBetween(0, 1) < 0.002) {
+            this.rest = true;
+            this.restTimer = Phaser.Math.FloatBetween(0.5, 2);
+            this.anims.play('fly-idle', true);
+            return;
         }
 
         toTarget.normalize();

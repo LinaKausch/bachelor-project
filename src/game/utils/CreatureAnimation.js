@@ -18,4 +18,5 @@ export const creatureAnimation = (scene) => {
         frames: [{ key: 'fly', frame: 4 }],
         frameRate: 0,
     });
+
 }
