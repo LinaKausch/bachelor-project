@@ -23,9 +23,9 @@ export const traceOn = (player) => {
         },
         speed: 60,
         scale: { start: 0.07, end: 0 },
-        lifespan: 700,
+        lifespan: 1000,
         frequency: 30,
-        blendMode: 'SCREEN'
+        blendMode: 'ADD'
     });
 
     player._traceEmitter.setDepth(player.depth - 1);

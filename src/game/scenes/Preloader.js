@@ -43,6 +43,9 @@ export class Preloader extends Scene
         this.load.image('colour', 'potions-colour.png');
         this.load.image('trace', 'potions-trace.png');
 
+        this.load.video('part1', 'part1.mp4', 'loadeddata');
+        this.load.video('part2', 'part2.mp4', 'loadeddata');
+
     }
 
     create ()
@@ -51,6 +54,6 @@ export class Preloader extends Scene
         //  For example, you can define global animations here, so we can use them in other scenes.
 
         //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-        this.scene.start('Potions');
+        this.scene.start('Idle');
     }
 }
