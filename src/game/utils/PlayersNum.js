@@ -1,3 +1,3 @@
 export const PlayersNum = {
-    players: 2
+    players: 3
 }

@@ -1,14 +1,11 @@
 import { Scene } from 'phaser';
 
-export class Preloader extends Scene
-{
-    constructor ()
-    {
+export class Preloader extends Scene {
+    constructor() {
         super('Preloader');
     }
 
-    init ()
-    {
+    init() {
         //  We loaded this image in our Boot Scene, so we can display it here
         this.add.image(512, 384, 'background');
 
@@ -16,7 +13,7 @@ export class Preloader extends Scene
         this.add.rectangle(512, 384, 468, 32).setStrokeStyle(1, 0xffffff);
 
         //  This is the progress bar itself. It will increase in size from the left based on the % of progress.
-        const bar = this.add.rectangle(512-230, 384, 4, 28, 0xffffff);
+        const bar = this.add.rectangle(512 - 230, 384, 4, 28, 0xffffff);
 
         //  Use the 'progress' event emitted by the LoaderPlugin to update the loading bar
         this.load.on('progress', (progress) => {
@@ -27,33 +24,31 @@ export class Preloader extends Scene
         });
     }
 
-    preload ()
-    {
-        //  Load the assets for the game - Replace with your own assets
+    preload() {
         this.load.setPath('assets');
-        this.load.image('npc', 'creature.png');
-        this.load.spritesheet('fly', 'creature-ss.png', {
-            frameWidth: 840, 
-            frameHeight: 1008   
+        this.load.spritesheet('fly', 'sprites/creature-ss.png', {
+            frameWidth: 840,
+            frameHeight: 1008
         });
 
-        this.load.image('spark', 'spark.png');
-        this.load.image('glow', 'potions-glow.png');
-        this.load.image('grow', 'potions-grow.png');
-        this.load.image('colour', 'potions-colour.png');
-        this.load.image('trace', 'potions-trace.png');
+        this.load.image('spark', 'items/spark.png');
+        this.load.image('spark-y', 'items/spark-y.png');
+        this.load.image('glow', 'items/potions-glow.png');
+        this.load.image('grow', 'items/potions-grow.png');
+        this.load.image('colour', 'items/potions-colour.png');
+        this.load.image('trace', 'items/potions-trace.png');
+        this.load.image('wand', 'items/wand.png');
+        this.load.image('wand-lines', 'items/wand-lines.png');
 
-        this.load.video('part1', 'part1.mp4', 'loadeddata');
-        this.load.video('part2', 'part2.mp4', 'loadeddata');
+        this.load.video('part1', 'video/part1.mp4', 'loadeddata');
+        this.load.video('part2', 'video/part2.mp4', 'loadeddata');
+        this.load.video('idle', 'video/idle.mp4', 'loadeddata');
 
+        this.load.glsl('wiggle', '/src/game/shaders/wiggle.frag');
     }
 
-    create ()
-    {
-        //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
-        //  For example, you can define global animations here, so we can use them in other scenes.
+    create() {
 
-        //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
         this.scene.start('Idle');
     }
 }

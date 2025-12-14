@@ -2,7 +2,7 @@ export const growOn = (player) => {
     const scene = player.scene;
 
     const scale = 0.7;
-    const duration = 2000;
+    const duration = 1500;
     if (!player._originalSize) {
         player._originalSize = { x: player.scaleX, y: player.scaleY };
     }

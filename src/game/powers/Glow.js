@@ -6,7 +6,7 @@ export const glowOn = (player) => {
         player.glowFX = null;
     }
 
-    player.glowFX = player.preFX.addGlow(0xB8EBF5, 10, false, 0.9, 10);
+    player.glowFX = player.preFX.addGlow(0xC2AFE5, 3, false, 0.6, 5);
 
     if (player._glowTween) {
         player._glowTween.stop();

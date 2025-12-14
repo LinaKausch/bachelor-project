@@ -14,12 +14,9 @@ export class AnimationOne extends Scene {
 
         video.play();
 
-
-        // video.setDisplaySize(3840, 2160);
+        // video size: (3840, 2160);
         video.setDisplaySize(100, 100);
 
-
-        // Auto-next scene
         video.on('complete', () => {
             this.scene.start('Potions');
         });

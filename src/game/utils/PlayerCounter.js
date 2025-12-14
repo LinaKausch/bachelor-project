@@ -53,12 +53,12 @@ export default class PlayerCounter {
 
             // Portrait
             const portrait = scene.add.circle(x, y, 50, 0x4a6fa5);
-            portrait.setStrokeStyle(6, 0xffffff);
+            portrait.setStrokeStyle(2, 0xffffff);
             this.container.add(portrait);
 
             // Badge
             const badge = scene.add.circle(x, y + 58, 22, 0x4a6fa5);
-            badge.setStrokeStyle(4, 0xffffff);
+            badge.setStrokeStyle(2, 0xffffff);
             this.container.add(badge);
 
             const label = scene.add.text(x, y + 58, `P${i + 1}`, {
@@ -69,58 +69,98 @@ export default class PlayerCounter {
             this.container.add(label);
 
 
-
-            const barY = y + 115;
+            const barY = y + 95;
             const barWidth = 120;
             const barHeight = 12;
 
             const barBg = scene.add.graphics();
-            barBg.lineStyle(4, 0xffffff);
+            barBg.lineStyle(2, 0xffffff);
             barBg.strokeRoundedRect(x - barWidth / 2, barY, barWidth, barHeight, 6);
             this.container.add(barBg);
 
             const barFill = scene.add.graphics();
             this.container.add(barFill);
 
-            const statusText = scene.add.text(x, barY + 32, "Potion Ready", {
-                fontFamily: "Arial",
-                fontSize: "16px",
-                color: "#ffffff"
-            }).setOrigin(0.5);
-            this.container.add(statusText);
+            // const statusText = scene.add.text(x, barY + 32, "Potion Ready", {
+            //     fontFamily: "Arial",
+            //     fontSize: "16px",
+            //     color: "#ffffff"
+            // }).setOrigin(0.5);
+            // this.container.add(statusText);
 
             this.cooldowns.push({
                 barFill,
                 barWidth,
                 barHeight,
-                statusText,
-                cooldown: 0,      
-                maxCooldown: 10    
+                // store coordinates for drawing
+                x,
+                barY,
+                // level: 1 = full/ready, 0 = empty
+                level: 1,
+                // state: 'ready' | 'draining' | 'recharging'
+                state: 'ready',
+                // timing parameters (seconds)
+                drainTotal: 0,
+                drainRemaining: 0,
+                rechargeTotal: 0,
+                rechargeRemaining: 0
             });
         }
     }
 
     update(delta) {
         for (let cd of this.cooldowns) {
-            if (cd.cooldown > 0) {
-                cd.cooldown -= delta;
+            // handle draining (bar goes down)
+            if (cd.state === 'draining') {
+                cd.drainRemaining = Math.max(0, cd.drainRemaining - delta);
+                cd.level = cd.drainRemaining > 0 ? cd.drainRemaining / cd.drainTotal : 0;
 
-                const percent = Phaser.Math.Clamp(1 - cd.cooldown / cd.maxCooldown, 0, 1);
+                if (cd.drainRemaining <= 0) {
+                    cd.state = 'recharging';
+                    cd.rechargeRemaining = cd.rechargeTotal;
+                }
+            }
 
-                cd.barFill.clear();
-                cd.barFill.fillStyle(0x4a6fa5);
+            // handle recharging (bar goes up)
+            if (cd.state === 'recharging') {
+                cd.rechargeRemaining = Math.max(0, cd.rechargeRemaining - delta);
+
+                cd.level = cd.rechargeTotal > 0
+                    ? 1 - (cd.rechargeRemaining / cd.rechargeTotal)
+                    : 1;
+
+                if (cd.rechargeRemaining <= 0) {
+                    cd.state = 'ready';
+                    cd.level = 1;
+                }
+            }
+
+            // draw fill from left edge based on level
+            cd.barFill.clear();
+            cd.barFill.fillStyle(0x4a6fa5);
+            const fillW = cd.barWidth * Phaser.Math.Clamp(cd.level, 0, 1);
+            const fillX = cd.x - cd.barWidth / 2;
+            const fillY = cd.barY;
+            if (fillW > 0) {
                 cd.barFill.fillRoundedRect(
-                    cd.statusText.x - cd.barWidth / 2,
-                    cd.statusText.y - 32,
-                    cd.barWidth * percent,
+                    fillX,
+                    fillY,
+                    fillW,
                     cd.barHeight,
                     6
                 );
-
-                cd.statusText.setText("Potion Disabled");
-            } else {
-                cd.cooldown = 0;
             }
         }
+    }
+
+    startCooldown(index, drainSeconds = 10, rechargeSeconds = 5) {
+        const cd = this.cooldowns[index];
+        if (!cd) return;
+        cd.state = 'draining';
+        cd.drainTotal = drainSeconds;
+        cd.drainRemaining = drainSeconds;
+        cd.rechargeTotal = rechargeSeconds;
+        cd.rechargeRemaining = 0;
+        cd.level = 1;
     }
 }

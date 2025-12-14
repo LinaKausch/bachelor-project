@@ -3,9 +3,10 @@ import Player from '../prefabs/player.js';
 import Npc from '../prefabs/npc.js';
 import Timer from '../utils/Timer.js';
 import Wand from '../prefabs/wand.js';
+import { Serial } from '../utils/Serial.js';
 import Counter from '../utils/PlayerCounter.js';
 import { creatureAnimation } from '../utils/CreatureAnimation.js';
-import { traceOn, traceOff } from '../powers/Trace.js';
+import { wiggleOn, wiggleOff, initWiggle, updateWiggle } from '../powers/Wiggle.js';
 import { glowOn, glowOff } from '../powers/Glow.js';
 import { growOn, growOff } from '../powers/Grow.js';
 import { colorOn, colorOff } from '../powers/Color.js';
@@ -14,66 +15,8 @@ import { ChosenPowers } from "../utils/ChosenPowers.js";
 import { PlayersNum } from '../utils/PlayersNum.js';
 import TimerBar from "../utils/TimerBar.js";
 import PlayerCounter from "../utils/PlayerCounter.js";
+import WigglePipeline from '../shaders/WigglePipeline.js';
 
-
-
-
-let port;
-let reader;
-
-// window.connectArduino = async () => {
-//     port = await navigator.serial.requestPort();
-//     await port.open({ baudRate: 9600 });
-
-//     const textDecoder = new TextDecoderStream();
-//     port.readable.pipeTo(textDecoder.writable);
-//     reader = textDecoder.readable.getReader();
-
-//     console.log("Connected! Waiting for data...");
-//     let buffer = '';
-
-//     while (true) {
-//         const { value, done } = await reader.read();
-//         if (done) break;
-
-//         buffer += value;
-//         let lines = buffer.split('\n');
-//         buffer = lines.pop();
-
-//         for (let line of lines) {
-//             line = line.trim();
-//             if (line.startsWith("{")) {
-//                 try {
-//                     const data = JSON.parse(line);
-//                     console.log("JSON:", data);
-
-//                     // scene.joystickDir1 = data.p1;
-//                     // scene.joystickDir2 = data.p2;
-
-//                     // if (data.btn1 !== undefined) scene.blueBtn = data.btn1;
-//                     // if (data.btn2 !== undefined) scene.yellowBtn = data.btn2;
-
-//                     // scene.accX = data.accX;
-//                     // scene.accY = data.accY;
-//                     // scene.zButton = data.z;
-//                     window.joy1 = data.p1;
-//                     window.joy2 = data.p2;
-//                     window.btn1 = data.btn1;
-//                     window.btn2 = data.btn2;
-//                     window.accX = data.accX;
-//                     window.accY = data.accY;
-//                     window.zButton = data.z;
-
-
-//                 } catch (e) {
-//                     console.warn("Bad JSON:", line);
-//                 }
-//             }
-
-//         }
-//     }
-
-// }
 
 export class Game extends Scene {
     constructor() {
@@ -81,13 +24,18 @@ export class Game extends Scene {
     }
 
     create() {
-        this.bg = this.add.image(0, 0, 'background');
+        this.bg = this.add.image(0, 0, 'game-background');
         this.bg.setOrigin(0, 0);
         this.bg.displayWidth = this.scale.width;
         this.bg.displayHeight = this.scale.height;
         this.bg.setDepth(-10);
 
+        // Remove ground falling behavior; keep original gameplay
+
         creatureAnimation(this);
+
+        // Initialize the wiggle pipeline via the Wiggle power module (handles renderer checks)
+        initWiggle(this);
 
         this.gameOn = true;
         this.player1Found = false;
@@ -96,16 +44,20 @@ export class Game extends Scene {
         const creatureCount = PlayersNum.players === 3 ? 2 : 1;
         this.playerCounter = new PlayerCounter(this, creatureCount);
 
-        // PLAYER 1
-        this.player1 = new Player(this, 200, 200);
+        const player1X = Phaser.Math.Between(100, this.scale.width - 100);
+        const player1Y = Phaser.Math.Between(100, this.scale.height - 100);
+        const player2X = Phaser.Math.Between(100, this.scale.width - 100);
+        const player2Y = Phaser.Math.Between(100, this.scale.height - 100);
 
+        // PLAYER 1
+        this.player1 = new Player(this, player1X, player1Y);
         this.player1.setInteractive();
         this.joystickDir1 = "none";
         this.blueBtn = 0;
         this.prevBlue = 0;
 
         //PLAYER 2
-        this.player2 = new Player(this, 300, 300);
+        this.player2 = new Player(this, player2X, player2Y);
         this.player2.setInteractive();
 
         if (PlayersNum.players === 2) {
@@ -154,7 +106,9 @@ export class Game extends Scene {
             quantity: 0
         });
 
-        // growOn(this.player1);
+        // glowOn(this.player1);
+
+
         // glowOn(this.player2);
 
 
@@ -173,31 +127,36 @@ export class Game extends Scene {
         //TARGET
         this.wand = new Wand(this);
 
-        //Mouse
+        // Mouse (only active when no serial port is connected)
         this.input.on("pointermove", (pointer) => {
-            this.wand.x = pointer.x;
-            this.wand.y = pointer.y;
+            if (!Serial || !Serial.port) {
+                this.wand.x = pointer.x;
+                this.wand.y = pointer.y;
+            }
         });
         this.input.on("pointerdown", () => {
-            this.mouseCasting = true;
+            if (!Serial || !Serial.port) this.mouseCasting = true;
         });
 
         this.input.on("pointerup", () => {
-            this.mouseCasting = false;
+            if (!Serial || !Serial.port) this.mouseCasting = false;
         });
         //
 
         // TIMER
-        this.timer = new Timer(120);
-        this.timerBar = new TimerBar(this, this.timer);
+        this.timer = new Timer(30);
+        if (PlayersNum.players === 3) {
+            this.timer = new Timer(50);
+        }
+        this.timerBar = new TimerBar(this, this.timer, { direction: 'vertical' });
         this.timer.start();
 
 
-        //COOLDOWN
-        this.playerCounter.cooldowns[0].cooldown = 10;
-        if (PlayersNum.players === 3) {
-            this.playerCounter.cooldowns[1].cooldown = 10;
-        }
+        // //COOLDOWN
+        // this.playerCounter.cooldowns[0].cooldown = 5;
+        // if (PlayersNum.players === 3) {
+        //     this.playerCounter.cooldowns[1].cooldown = 5;
+        // }
 
         // this.timerText = this.add.text(20, 20, "Time: 120", {
         //     fontSize: "32px",
@@ -220,20 +179,6 @@ export class Game extends Scene {
         return Phaser.Geom.Intersects.CircleToRectangle(circle, player.getBounds());
     }
 
-    poof(x, y) {
-        this.emitter.explode(20, x, y);
-        // const fx = this.postFX.addGlow(0x66ffcc, 1, 2, 2);
-        //     this.tweens.add({
-        //         targets: fx,
-        //         outerStrength: 1.0,
-        //         duration: 500,
-        //         yoyo: true,
-        //         repeat: -1
-        //     });
-    }
-
-
-
     findCreature() {
         this.creatureCounter.add();
         console.log('Found:', this.creatureCounter.get());
@@ -241,6 +186,10 @@ export class Game extends Scene {
 
     update(time, delta) {
         const dt = delta / 1000;
+        const tsec = time / 1000;
+        updateWiggle(tsec);
+
+        // Update wiggle shader time uniform via the Wiggle module
 
         this.joystickDir1 = Input.joy1;
         this.joystickDir2 = Input.joy2;
@@ -252,12 +201,22 @@ export class Game extends Scene {
 
 
         if (this.blueBtn === 1 && this.prevBlue === 0) {
+            // const power = this.getPower(ChosenPowers.p1);
+            // if (power) this.tempOff(this.player1, power.off, power.on, 10, 5);
             const power = this.getPower(ChosenPowers.p1);
-            if (power) this.tempOff(this.player1, power.off, power.on, 10, 10);
+            if (power) {
+                this.playerCounter.startCooldown(0, 10, 5);
+                this.tempOff(this.player1, power.off, power.on, 10, 5);
+            }
         }
         if (this.yellowBtn === 1 && this.prevYellow === 0) {
+            // const power = this.getPower(ChosenPowers.p2);
+            // if (power) this.tempOff(this.player2, power.off, power.on, 10, 5);
             const power = this.getPower(ChosenPowers.p2);
-            if (power) this.tempOff(this.player2, power.off, power.on, 10, 10);
+            if (power) {
+                this.playerCounter.startCooldown(1, 10, 5);
+                this.tempOff(this.player2, power.off, power.on, 10, 5);
+            }
         }
         this.prevBlue = this.blueBtn;
         this.prevYellow = this.yellowBtn;
@@ -271,20 +230,17 @@ export class Game extends Scene {
         this.player1.update(time, delta);
         this.player2.update(time, delta);
 
-
         const cast = (this.zButton === 1) || this.mouseCasting;
 
-
-        if (!this.player1Found && this.player1.visible && this.checkWandHit(this.player1) && cast) {
-            this.poof(this.player1.x, this.player1.y);
+        if (!this.player1Found && this.checkWandHit(this.player1) && cast) {
+            this.player1.startGravityFall(this.scale.height - 60);
             this.player1Found = true;
-            this.player1.setVisible(false);
+
         }
 
-        if (!this.player2Found && this.player2.visible && this.checkWandHit(this.player2) && cast) {
-            this.poof(this.player2.x, this.player2.y);
+        if (!this.player2Found && this.checkWandHit(this.player2) && cast) {
+            this.player2.startGravityFall(this.scale.height - 60);
             this.player2Found = true;
-            this.player2.setVisible(false);
         }
 
         if (this.player1Found && this.player2Found) {
@@ -300,7 +256,7 @@ export class Game extends Scene {
 
         this.timer.update(delta / 1000);
         this.timerBar.update();
-   
+
         if (this.timer.getTimeLeft() <= 0 && this.gameOn) {
             this.gameOn = false;
             this.endGame();
@@ -315,13 +271,13 @@ export class Game extends Scene {
 
         glowOff(player);
         growOff(player);
-        traceOff(player);
+        wiggleOff(player);
         colorOff(player);
 
         switch (potionIndex) {
             case 0: glowOn(player); break;
             case 1: growOn(player); break;
-            case 2: traceOn(player); break;
+            case 2: wiggleOn(player); break;
             case 3: colorOn(player); break;
         }
     }
@@ -330,10 +286,11 @@ export class Game extends Scene {
         switch (index) {
             case 0: return { on: glowOn, off: glowOff };
             case 1: return { on: growOn, off: growOff };
-            case 2: return { on: traceOn, off: traceOff };
+            case 2: return { on: wiggleOn, off: wiggleOff };
             case 3: return { on: colorOn, off: colorOff };
             default: return null;
         }
+    
     }
 
     endGame() {

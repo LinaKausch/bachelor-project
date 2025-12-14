@@ -2,10 +2,10 @@ import { Boot } from './scenes/Boot';
 import { Game as MainGame } from './scenes/Game';
 import { GameOver } from './scenes/GameOver';
 import { Idle } from './scenes/Idle';
-import {Players} from './scenes/Players';
-import {AnimationOne} from './scenes/AnimationOne';
-import {Potions} from './scenes/Potions';
-import {AnimationTwo} from './scenes/AnimationTwo';
+import { Players } from './scenes/Players';
+import { AnimationOne } from './scenes/AnimationOne';
+import { Potions } from './scenes/Potions';
+import { AnimationTwo } from './scenes/AnimationTwo';
 import { Preloader } from './scenes/Preloader';
 import { AUTO, Game } from 'phaser';
 
@@ -18,7 +18,7 @@ const config = {
     parent: 'game-container',
     backgroundColor: '#028af8',
     scale: {
-        mode: Phaser.Scale.FIT,
+        mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
     scene: [
@@ -36,7 +36,21 @@ const config = {
 
 const StartGame = (parent) => {
 
-    return new Game({ ...config, parent });
+    const game =new Game({ ...config, parent });
+
+    window.addEventListener('keydown', e => {
+        if (e.code !== 'KeyF') return;
+
+        const scale = game.scale;
+
+        if (!scale.isFullscreen) {
+            scale.startFullscreen();
+        } else {
+            scale.stopFullscreen();
+        }
+    });
+
+    return game;
 
 }
 

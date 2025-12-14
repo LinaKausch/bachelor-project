@@ -1,65 +1,6 @@
-// import { Scene } from 'phaser';
-
-// export class Idle extends Scene {
-//     constructor() {
-//         super('Idle');
-//     }
-
-//     create() {
-//         this.bg = this.add.image(0, 0, 'background');
-//         this.bg.setOrigin(0, 0);
-//         this.bg.displayWidth = this.scale.width;
-//         this.bg.displayHeight = this.scale.height;
-//         this.bg.setDepth(-10);
-
-//         this.add.rectangle(
-//             0, 0,
-//             this.scale.width,
-//             this.scale.height,
-//             0x000000,
-//             0.5
-//         ).setOrigin(0);
-
-//         const centerX = this.scale.width / 2;
-//         let y = this.scale.height / 2 - 80;
-
-//         this.add.text(centerX,
-//             y, 'Mistique Minis', {
-//             fontFamily: 'Arial Black', fontSize: 48, color: '#c685ffff',
-//             stroke: '#e3e1ffff', strokeThickness: 8,
-//             align: 'center'
-//         }).setOrigin(0.5);
-
-//         y += 60;
-//         this.add.text(centerX,
-//             y, "Can you escape the wizard's spell?", {
-//             fontFamily: 'Arial Black', fontSize: 25, color: '#ffffff',
-//             align: 'center'
-//         }).setOrigin(0.5);
-
-//         y += 100;
-//         this.startButton = this.add.text(
-//             centerX,
-//             y,
-//             "START",
-//             {
-//                 fontSize: "48px",
-//                 fontFamily: "Arial",
-//                 color: "#ffffff"
-//             }
-//         )
-//             .setOrigin(0.5)
-//             .setInteractive()
-//             .on("pointerdown", () => {
-//                 this.scene.start('Players');
-//             });
-
-//     }
-// }
-
 import { Scene } from 'phaser';
 import Wand from '../prefabs/wand.js';
-import { Input } from '../utils/Input.js';
+import { Serial } from '../utils/Serial.js';
 
 export class Idle extends Scene {
     constructor() {
@@ -67,42 +8,45 @@ export class Idle extends Scene {
     }
 
     create() {
-        // Background
-        this.bg = this.add.image(0, 0, 'background');
-        this.bg.setOrigin(0, 0);
-        this.bg.displayWidth = this.scale.width;
-        this.bg.displayHeight = this.scale.height;
+        // this.bg = this.add.image(0, 0, 'background')
+        //     .setOrigin(0)
+        //     .setDepth(-10);
 
-        // Soft dark overlay
-        this.add.rectangle(
-            0, 0,
-            this.scale.width,
-            this.scale.height,
-            0x000000,
-            0.4
-        ).setOrigin(0);
+        // this.overlay = this.add.rectangle(
+        //     0, 0,
+        //     0, 0,
+        //     0x000000,
+        //     0.5
+        // ).setOrigin(0);
+
+        const video = this.add.video(
+            this.scale.width / 2,
+            this.scale.height / 2,
+            'idle'
+        );
+
+        video.play(true);
+        video.setDisplaySize(100, 100);
+        video.setDepth(-10);
+
+
+        this.scale.on('resize', ({ width, height }) => {
+            this.resize(width, height);
+        });
 
         const centerX = this.scale.width / 2;
+        const buttonY = this.scale.height / 2 + 100;
 
         // TITLE
-        this.add.text(centerX, 140, 'Mistique Minis', {
+        this.title = this.add.text(centerX, 140, 'Mistique Minis', {
             fontFamily: 'Arial Black',
-            fontSize: 80,
+            fontSize: 60,
             color: '#c685ffff',
-            stroke: '#000000',
-            strokeThickness: 10
+            stroke: '#000000ff',
+            strokeThickness: 8
         }).setOrigin(0.5);
 
-        // SUBTITLE
-        this.add.text(centerX, 230,
-            'Kan de tovenaar de echte wezens vangen?', {
-            fontFamily: 'Arial',
-            fontSize: 32,
-            color: '#ffffff'
-        }).setOrigin(0.5);
-
-        // PLAY BUTTON
-        const buttonY = this.scale.height / 2 + 100;
+        // BUTTON
         const bw = 300, bh = 90;
         const bx = centerX - bw / 2;
         const by = buttonY - bh / 2;
@@ -124,18 +68,15 @@ export class Idle extends Scene {
             .setInteractive();
         buttonZone.on("pointerdown", () => this.scene.start("Players"));
 
-        // ------------------------------------------------
-        // WAND TARGET + SHOOTING IN IDLE SCREEN
-        // ------------------------------------------------
+        // WAND
         this.wand = new Wand(this);
 
-        // Mouse movement controls wand
-        this.input.on("pointermove", (pointer) => {
-            this.wand.x = pointer.x;
-            this.wand.y = pointer.y;
+        this.input.on("pointermove", p => {
+            if (!Serial || !Serial.port) {
+                this.wand.setPosition(p.x, p.y);
+            }
         });
 
-        // Mouse casting events
         this.input.on("pointerdown", () => {
             this.mouseCasting = true;
         });
@@ -143,11 +84,21 @@ export class Idle extends Scene {
         this.input.on("pointerup", () => {
             this.mouseCasting = false;
         });
+
+        // this.resize(this.scale.width, this.scale.height);
     }
+
+    // resize(width, height) {
+    //     this.bg.displayWidth = width;
+    //     this.bg.displayHeight = height;
+
+    //     this.overlay.width = width;
+    //     this.overlay.height = height;
+    // }
+
 
     update(time, delta) {
-        // Update wand just like in the Game scene
         this.wand.update(time, delta);
+
     }
 }
-

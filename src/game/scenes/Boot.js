@@ -12,8 +12,9 @@ export class Boot extends Scene
         //  The Boot Scene is typically used to load in any assets you require for your Preloader, such as a game logo or background.
         //  The smaller the file size of the assets, the better, as the Boot Scene itself has no preloader.
 
-        this.load.image('background', 'assets/bg.jpeg');
-        this.load.image('cabin', 'assets/cabin.png');
+        this.load.image('background', 'assets/backgrounds/bg-b.png');
+        this.load.image('cabin', 'assets/backgrounds/cabin.png');
+        this.load.image('game-background', 'assets/backgrounds/bg.png');
     }
 
     create ()
