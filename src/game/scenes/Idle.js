@@ -38,12 +38,10 @@ export class Idle extends Scene {
         const buttonY = this.scale.height / 2 + 100;
 
         // TITLE
-        this.title = this.add.text(centerX, 140, 'Mistique Minis', {
-            fontFamily: 'Arial Black',
-            fontSize: 60,
-            color: '#c685ffff',
-            stroke: '#000000ff',
-            strokeThickness: 8
+        this.title = this.add.text(centerX, 190, 'Mistique Minis', {
+            fontFamily: "Nova Square",
+            fontSize: '130px',
+            color: '#fbf9fcff',
         }).setOrigin(0.5);
 
         // BUTTON
@@ -58,8 +56,9 @@ export class Idle extends Scene {
         buttonBg.strokeRoundedRect(bx, by, bw, bh, 30);
 
         this.add.text(centerX, buttonY, "START", {
-            fontFamily: "Arial Black",
+            fontFamily: "Nunito",
             fontSize: 40,
+            fontStyle: "bold",
             color: "#000000"
         }).setOrigin(0.5);
 

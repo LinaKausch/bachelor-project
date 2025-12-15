@@ -43,6 +43,7 @@ export class Preloader extends Scene {
         this.load.video('part1', 'video/part1.mp4', 'loadeddata');
         this.load.video('part2', 'video/part2.mp4', 'loadeddata');
         this.load.video('idle', 'video/idle.mp4', 'loadeddata');
+        this.load.video('potion-demo', 'video/potion-demo.mp4', 'loadeddata');
 
         this.load.glsl('wiggle', '/src/game/shaders/wiggle.frag');
     }

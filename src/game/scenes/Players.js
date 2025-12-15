@@ -18,32 +18,32 @@ export class Players extends Scene {
         const centerX = this.scale.width / 2;
 
         //TITLE
-        this.add.text(centerX, 120, "Hoeveel Spelers?", {
-            fontFamily: 'Arial Black',
+        this.add.text(centerX, 100, "Hoeveel Spelers?", {
+            fontFamily: 'Nova Square',
             fontSize: 60,
-            color: '#c685ffff',
-            stroke: '#000000',
-            strokeThickness: 8
+            color: '#fbf9fcff',
         }).setOrigin(0.5);
 
-        //SUBTITLE
-        this.add.text(centerX, 200, "Gebruik de toverstaf om de aantal spelers te selecteren", {
-            fontFamily: 'Arial',
-            fontSize: 28,
-            color: '#ffffff'
-        }).setOrigin(0.5);
+        this.players3back = this.add.image(455, 385, 'back-3p');
+        this.players3back.setScale(1);
+        this.players3front = this.add.image(455, 385, 'front-3p');
+        this.players3front.setScale(1);
+        this.players2back = this.add.image(1070, 385, 'back-2p');
+        this.players2back.setScale(1);
+        this.players2front = this.add.image(1070, 385, 'front-2p');
+        this.players2front.setScale(1);
 
         //BUTTONS
-        const buttonY = this.scale.height / 2 + 20;
+        const buttonY = this.scale.height / 2 + 250;
         const bw = 280;
         const bh = 110;
 
-        this.drawPlayerButton(centerX - 220, buttonY, "3 Spelers", () => {
+        this.drawPlayerButton(centerX - 310, buttonY, "3 Spelers", () => {
             PlayersNum.players = 3;
             this.scene.start('AnimationOne');
         });
 
-        this.drawPlayerButton(centerX + 220, buttonY, "2 Spelers", () => {
+        this.drawPlayerButton(centerX + 310, buttonY, "2 Spelers", () => {
             PlayersNum.players = 2;
             this.scene.start('AnimationOne');
         });
@@ -72,8 +72,8 @@ export class Players extends Scene {
     }
 
     drawPlayerButton(x, y, label, onClick) {
-        const bw = 260;
-        const bh = 90;
+        const bw = 270;
+        const bh = 80;
 
         const bg = this.add.graphics();
         bg.fillStyle(0xdedcff, 1);
@@ -82,8 +82,9 @@ export class Players extends Scene {
         bg.strokeRoundedRect(x - bw / 2, y - bh / 2, bw, bh, 25);
 
         const text = this.add.text(x, y, label, {
-            fontFamily: "Arial Black",
-            fontSize: 32,
+            fontFamily: "Nunito",
+            fontSize: 23,
+            fontStyle: "bold",
             color: "#000000"
         }).setOrigin(0.5);
 
