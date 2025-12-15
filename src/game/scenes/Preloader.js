@@ -53,6 +53,6 @@ export class Preloader extends Scene {
 
     create() {
 
-        this.scene.start('Players');
+        this.scene.start('Potions');
     }
 }
