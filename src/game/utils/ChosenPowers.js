@@ -1,4 +1,4 @@
 export const ChosenPowers = {
-    p1: null,
-    p2: null
+    p1: 0,
+    p2: 1
 };

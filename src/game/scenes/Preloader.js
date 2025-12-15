@@ -57,6 +57,6 @@ export class Preloader extends Scene {
 
     create() {
 
-        this.scene.start('Idle');
+        this.scene.start('Game');
     }
 }
