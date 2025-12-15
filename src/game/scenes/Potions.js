@@ -43,32 +43,54 @@ export class Potions extends Scene {
         // Ensure wiggle pipeline is available for previews in this scene
         initWiggle(this);
 
-        //BORDERS
-        this.p1Border = this.add.graphics();
-        this.p1Border.lineStyle(6, 0x5DA9FF, 1);
-        this.p1Border.setDepth(5);
+        const card = this.add.image(
+            this.scale.width / 2,
+            this.scale.height / 2,
+            'potion-bg'
+        ).setDepth(5).setScale(0.5, 0.4);
 
-        this.p2Border = this.add.graphics();
-        this.p2Border.lineStyle(6, 0xFFE45D, 1);
-        this.p2Border.setDepth(5);
+        this.add.text(
+            card.x,
+            card.y - card.displayHeight / 2 + 50,
+            'Selecteer jouw toverdrankje',
+            {
+                fontFamily: 'Arial Black',
+                fontSize: '26px',
+                color: '#2e2a3a'
+            }
+        ).setOrigin(0.5).setDepth(6);
+
+
+        //BORDERS
+        this.p1Border = this.add.image(0, 0, 'p1-frame').setDepth(25).setScale(0.4);
+        // this.p1Border.lineStyle(6, 0x5DA9FF, 1);
+
+
+        this.p2Border = this.add.image(0, 0, 'p2-frame').setDepth(25).setScale(0.4);
+        // this.p2Border.lineStyle(6, 0xFFE45D, 1);
+
 
         this.selected1 = 0;
         this.selected2 = 3;
 
         //POTIONS
-        this.potion1 = this.add.image(400, 300, 'glow');
-        this.potion1.setScale(0.1);
-
-        this.potion2 = this.add.image(550, 300, 'grow');
-        this.potion2.setScale(0.1);
-
-        this.potion3 = this.add.image(700, 300, 'trace');
-        this.potion3.setScale(0.1);
-
-        this.potion4 = this.add.image(850, 300, 'colour');
-        this.potion4.setScale(0.1);
+        this.potion1 = this.add.image(0, 0, 'glow');
+        this.potion2 = this.add.image(0, 0, 'grow');
+        this.potion3 = this.add.image(0, 0, 'trace');
+        this.potion4 = this.add.image(0, 0, 'colour');
 
         this.potions = [this.potion1, this.potion2, this.potion3, this.potion4];
+        this.spacing = 150;
+        this.y = this.scale.height / 2 + 20;
+        this.totalWidth = this.spacing * (this.potions.length - 1);
+        this.startX = this.scale.width / 2 - this.totalWidth / 2;
+
+        this.potions.forEach((potion, i) => {
+            potion
+                .setPosition(this.startX + i * this.spacing, this.y)
+                .setScale(0.1)
+                .setDepth(6);
+        });
 
 
         //MOUSE CONTROL
@@ -90,19 +112,81 @@ export class Potions extends Scene {
         this.potion4.on('pointerout', () => { colorOff(this.player1); });
 
 
+        this.add.video(
+            this.scale.width / 2,
+            this.scale.height - 100,
+            'potion-demo'
+        ).setScale(0.2).play(true);
 
         //PLAYERS
+        this.add.image(
+            250,
+            150,
+            'title-e'
+        ).setOrigin(0.5).setScale(0.4);
+
+        this.add.image(
+            this.scale.width - 250,
+            150,
+            'title-e'
+        ).setOrigin(0.5).setScale(0.4);
+
+        this.add.text(
+             250,
+            130,
+            'Speler 1',
+            {
+                fontFamily: 'Arial Black',
+                fontSize: '24px',
+                color: '#1E192F'
+            }
+        ).setOrigin(0.5).setDepth(50);
+
+        this.add.text(
+            this.scale.width - 250,
+            130,
+            'Speler 2',
+            {
+                fontFamily: 'Arial Black',
+                fontSize: '24px',
+                color: '#1E192F'
+            }
+        ).setOrigin(0.5).setDepth(50);
+
+        this.add.text(
+            250,
+            165,
+             "Flapke",
+            {
+                fontFamily: 'Arial Black',
+                fontSize: '20px',
+                color: '#2347C2'
+            }
+        ).setOrigin(0.5).setDepth(50);
+
+        this.add.text(
+            this.scale.width - 250,
+            165,
+            "Snufke",
+            {
+                fontFamily: 'Arial Black',
+                fontSize: '20px',
+                color: '#2347C2'
+            }
+        ).setOrigin(0.5).setDepth(50);
+
         this.players = [];
 
-        const p1 = new Player(this, 150, 300);
-        p1.setScale(0.25);
+        const p1 = new Player(this, 250, this.scale.height / 2);
+        p1.setScale(0.3);
         p1.setVisible(true);
         p1.active = true;
+        p1.setOrigin(0.5);
         this.players.push(p1);
 
         if (PlayersNum.players === 3) {
-            const p2 = new Player(this, 1100, 300);
-            p2.setScale(0.25);
+            const p2 = new Player(this, this.scale.width - 250, this.scale.height / 2);
+            p2.setScale(0.3);
             p2.setVisible(true);
             p2.active = true;
             this.players.push(p2);
@@ -118,18 +202,21 @@ export class Potions extends Scene {
 
         this.updateBorders();
 
-        this.p1Status = this.add.text(150, 500, 'NIET KLAAR', {
-            fontFamily: 'Ariel black',
+        this.p1Status = this.add.text(250, this.scale.height / 2 + 200, 'NIET KLAAR', {
+            fontFamily: 'Arial black',
             fontSize: '24px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
         this.p2Status = this.player2
-            ? this.add.text(1100, 500, 'NIET KLAAR', {
-                fontFamily: 'Ariel black',
+            ? this.add.text(this.scale.width - 250, this.scale.height / 2 + 200, 'NIET KLAAR', {
+                fontFamily: 'Arial black',
                 fontSize: '24px',
                 color: '#ffffff'
-            }).setOrigin(0.5): null;
+            }).setOrigin(0.5) : null;
+
+
+
 
         // this.input.once("pointerdown", () => {
 
@@ -223,12 +310,14 @@ export class Potions extends Scene {
         if (!this.p1Locked && btn1 === 1 && this.prevBtn1 === 0) {
             this.p1Locked = true;
             this.applyPower(1, this.selected1);
+            this.p1Status.setText('KLAAR');
         }
 
         if (PlayersNum.players === 3) {
             if (!this.p2Locked && btn2 === 1 && this.prevBtn2 === 0) {
                 this.p2Locked = true;
                 this.applyPower(2, this.selected2);
+                this.p2Status?.setText('KLAAR');
             }
         } else {
             this.p2Locked = true;
@@ -240,38 +329,23 @@ export class Potions extends Scene {
 
 
     updateBorders = () => {
-
-        this.p1Border.clear();
-        this.p2Border.clear();
-
-        this.p1Border.lineStyle(6, 0x5DA9FF, 1);
-        this.p2Border.lineStyle(6, 0xFFE45D, 1);
-
         const p1 = this.potions[this.selected1];
-        const p2 = this.potions[this.selected2];
-
-        this.p1Border.strokeRect(
-            p1.x - p1.displayWidth / 2 - 10,
-            p1.y - p1.displayHeight / 2 - 10,
-            p1.displayWidth + 20,
-            p1.displayHeight + 20
-        );
-        if (PlayersNum.players === 3) {
-            const p2 = this.potions[this.selected2];
-            this.p2Border.lineStyle(6, 0xFFE45D, 1);
-            this.p2Border.strokeRect(
-                p2.x - p2.displayWidth / 2 - 10,
-                p2.y - p2.displayHeight / 2 - 10,
-                p2.displayWidth + 20,
-                p2.displayHeight + 20
-            );
+        if (p1) {
+            this.p1Border.setVisible(true);
+            this.p1Border.setPosition(p1.x, p1.y);
+            this.p1Border.setScale(0.5 * (p1.scaleX / 0.1)); // keep frame proportional if you change potion scale
         }
-        // this.p2Border.strokeRect(
-        //     p2.x - p2.displayWidth / 2 - 10,
-        //     p2.y - p2.displayHeight / 2 - 10,
-        //     p2.displayWidth + 20,
-        //     p2.displayHeight + 20
-        // );
+
+        if (PlayersNum.players === 3 && this.selected2 != null) {
+            const p2 = this.potions[this.selected2];
+            if (p2) {
+                this.p2Border.setVisible(true);
+                this.p2Border.setPosition(p2.x, p2.y);
+                this.p2Border.setScale(0.5 * (p2.scaleX / 0.1));
+            }
+        } else {
+            this.p2Border.setVisible(false);
+        }
     }
 
     previewPower(player, potionIndex) {

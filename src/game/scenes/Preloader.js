@@ -39,16 +39,24 @@ export class Preloader extends Scene {
         this.load.image('trace', 'items/potions-trace.png');
         this.load.image('wand', 'items/wand.png');
         this.load.image('wand-lines', 'items/wand-lines.png');
+        this.load.image('title-e', 'items/title.png');
+        this.load.image('potion-bg', 'items/potion-bg.png');
+        this.load.image('p1-frame', 'items/p1.png');
+        this.load.image('p2-frame', 'items/p2.png');
+        this.load.image('profile1', 'items/prof-p1.png');
+        this.load.image('profile2', 'items/prof-p2.png');
+        this.load.image('prof-bg', 'items/prof-back.png');
 
         this.load.video('part1', 'video/part1.mp4', 'loadeddata');
         this.load.video('part2', 'video/part2.mp4', 'loadeddata');
         this.load.video('idle', 'video/idle.mp4', 'loadeddata');
+        this.load.video('potion-demo', 'video/potion-demo.mp4', 'loadeddata');
 
         this.load.glsl('wiggle', '/src/game/shaders/wiggle.frag');
     }
 
     create() {
 
-        this.scene.start('Idle');
+        this.scene.start('Game');
     }
 }

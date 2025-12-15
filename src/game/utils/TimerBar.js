@@ -39,21 +39,21 @@ export default class TimerBar {
 
 
         this.x = scene.scale.width - 50;
-        this.y = scene.scale.height - 150;
+        this.y = scene.scale.height -260;
 
         this.wandOutline = scene.add.image(this.x, this.y, 'wand-lines');
         this.wandOutline.setOrigin(0.5, 1);
         this.wandOutline.setDepth(100);
         this.wandOutline.setScale(0.1);
         this.wandOutline.postFX.addGlow(0xffffff, 0.5, 5, 0.5);
-            this.wandOutline.scene.tweens.add({
-                targets: this.wandOutline.glowFX,
-                outerStrength: 0.1,
-                duration: 300,
-                yoyo: true,
-                repeat: -1
-            });
-        
+        this.wandOutline.scene.tweens.add({
+            targets: this.wandOutline.glowFX,
+            outerStrength: 0.1,
+            duration: 300,
+            yoyo: true,
+            repeat: -1
+        });
+
 
         this.wandFill = scene.add.image(this.x, this.y, 'wand');
         this.wandFill.setOrigin(0.5, 1);

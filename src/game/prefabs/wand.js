@@ -164,26 +164,23 @@ export default class Wand extends Phaser.GameObjects.Graphics {
         const useAccel = accX !== undefined && accY !== undefined;
 
         if (useAccel) {
-            // --- ACCEL CONTROL ---
-
-            // These are empirical values for Nunchuk
+     
             const CENTER_X = 130;
             const CENTER_Y = 130;
 
-            const RANGE = 50; // tilt sensitivity
+            const RANGE = 50; 
             let dx = (accX - CENTER_X) / RANGE;
             let dy = (accY - CENTER_Y) / RANGE;
 
-            // Dead zone
+          
             const DEAD = 0.15;
             if (Math.abs(dx) < DEAD) dx = 0;
             if (Math.abs(dy) < DEAD) dy = 0;
 
-            // Clamp tilt
+   
             dx = Phaser.Math.Clamp(dx, -1, 1);
             dy = Phaser.Math.Clamp(dy, -1, 1);
 
-            // Map to movement area
             const rangeX = this.scene.scale.width * 0.35;
             const rangeY = this.scene.scale.height * 0.35;
 
@@ -191,12 +188,11 @@ export default class Wand extends Phaser.GameObjects.Graphics {
             targetY = this.scene.scale.height / 2 + dy * rangeY;
 
         } else if (this.scene.input?.activePointer) {
-            // --- MOUSE FALLBACK ---
             targetX = this.scene.input.activePointer.x;
             targetY = this.scene.input.activePointer.y;
         }
 
-        // Smooth follow
+
         const followSmooth = useAccel ? 0.08 : 0.45;
         this.x = Phaser.Math.Linear(
             this.x,
@@ -209,7 +205,7 @@ export default class Wand extends Phaser.GameObjects.Graphics {
             followSmooth
         );
 
-        // Cast particles
+
         const cast = (Input.z === 1) || this.scene.mouseCasting;
         if (cast && time > this.lastShot + this.shootDelay) {
             this.particles.explode(30, this.x, this.y);
