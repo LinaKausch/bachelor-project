@@ -66,9 +66,9 @@ export class Preloader extends Scene {
         this.load.video('wizard-win', 'video/wizard-win.mp4', 'loadeddata');   
         this.load.video('mini-win', 'video/mini-win.mp4', 'loadeddata');
 
-        this.load.glsl('wiggle', '/src/game/shaders/wiggle.frag');
+        //  this.load.glsl('wiggle', '/src/game/shaders/wiggle.frag');
     }
     create() {
-                this.scene.start('Game');
+                this.scene.start('Idle');
     }
 }

@@ -62,10 +62,8 @@ const StartGame = (parent) => {
         return { vx, vy };
     };
 
-    // Sample loop
     setInterval(() => {
 
-        // 🚫 Do not track inactivity while Idle is active
         if (game.scene.isActive('Idle')) {
             stabilityStart = null;
             samples.length = 0;

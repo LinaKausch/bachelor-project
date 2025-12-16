@@ -8,12 +8,15 @@ export const SerialElectron = {
         }
 
         window.arduino.onData((line) => {
-            // console.log('📩 ELECTRON → RENDERER RAW:', line);
-            // if (!line) return;
+            console.log('📩 ELECTRON → RENDERER RAW:', line);
+            if (!line) return;
 
-            // line = line.replace(/\r/g, "").replace(/\0/g, "");
+            line = line.replace(/\r/g, "").replace(/\0/g, "");
 
-            // if (line[0] !== "{" || line[line.length - 1] !== "}") return;
+            if (line[0] !== "{" || line[line.length - 1] !== "}") {
+                console.warn('Skipping non-JSON line:', line);
+                return;
+            }
 
             line = line.trim();
 
@@ -28,7 +31,7 @@ export const SerialElectron = {
                 Input.accY = data.accY;
                 Input.z = data.z;
 
-                // console.log('🎮 INPUT UPDATED', Input);
+                console.log('🎮 INPUT UPDATED', Input);
 
 
             } catch (e) {
