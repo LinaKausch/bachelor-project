@@ -1,7 +1,6 @@
 import { Scene } from 'phaser';
 import Wand from '../prefabs/wand.js';
 import { Serial } from '../utils/Serial.js';
-import { Input } from '../utils/Input.js';
 import Button from '../utils/Button.js';
 
 export class Idle extends Scene {

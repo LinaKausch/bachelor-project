@@ -53,7 +53,6 @@ export class Game extends Scene {
             demo.stop();
             demo.destroy();
         });
-
         //PLAYERS
         const creatureCount = PlayersNum.players === 3 ? 2 : 1;
         this.playerCounter = new PlayerCounter(this, creatureCount);
@@ -146,6 +145,7 @@ export class Game extends Scene {
         const dt = delta / 1000;
         const tsec = time / 1000;
         updateWiggle(tsec);
+
 
         this.joystickDir1 = Input.joy1;
         this.joystickDir2 = Input.joy2;

@@ -5,8 +5,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     StartGame('game-container');
 
+    if (window.arduino) {
+        Serial.start();
+        return;
+    }
+
+    // Browser → user gesture required
     document.addEventListener("click", () => {
         Serial.start();
     }, { once: true });
-
 });
