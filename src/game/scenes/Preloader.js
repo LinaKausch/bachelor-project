@@ -30,6 +30,10 @@ export class Preloader extends Scene {
             frameWidth: 840,
             frameHeight: 1008
         });
+        this.load.spritesheet('wand-move', 'sprites/wand.png', {
+            frameWidth: 3903,
+            frameHeight: 3158
+        });
 
         this.load.image('spark', 'items/spark.png');
         this.load.image('spark-y', 'items/spark-y.png');
@@ -46,21 +50,25 @@ export class Preloader extends Scene {
         this.load.image('prof-bg', 'items/prof-back.png');
         this.load.image('profile1', 'items/prof-p1.png');
         this.load.image('profile2', 'items/prof-p2.png');
+        this.load.image('potion-bg', 'items/potion-bg.png');
+        this.load.image('title-e', 'items/title.png');
+        this.load.image('p1-frame', 'items/p1.png');
+        this.load.image('p2-frame', 'items/p2.png');
+        this.load.image('cage', 'items/cage.png');
 
 
         this.load.video('part1', 'video/part1.mp4', 'loadeddata');
         this.load.video('part2', 'video/part2.mp4', 'loadeddata');
         this.load.video('idle', 'video/idle.mp4', 'loadeddata');
         this.load.video('potion-demo', 'video/potion-demo.mp4', 'loadeddata');
+        this.load.video('game-demo', 'video/game-demo.mp4', 'loadeddata');
+        this.load.video('caught', 'video/caught.mp4', 'loadeddata');
+        this.load.video('wizard-win', 'video/wizard-win.mp4', 'loadeddata');   
+        this.load.video('mini-win', 'video/mini-win.mp4', 'loadeddata');
 
         this.load.glsl('wiggle', '/src/game/shaders/wiggle.frag');
     }
-
     create() {
-
-
-        this.scene.start('Idle');
-
-
+                this.scene.start('Game');
     }
 }

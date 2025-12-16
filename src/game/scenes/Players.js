@@ -2,6 +2,9 @@ import { Scene } from 'phaser';
 import { PlayersNum } from '../utils/PlayersNum.js';
 import Wand from '../prefabs/wand.js';
 import { Serial } from '../utils/Serial.js';
+import { Input } from '../utils/Input.js';
+import Button from '../utils/Button.js';
+
 
 export class Players extends Scene {
     constructor() {
@@ -18,37 +21,93 @@ export class Players extends Scene {
         const centerX = this.scale.width / 2;
 
         //TITLE
-        this.add.text(centerX, 100, "Hoeveel Spelers?", {
-            fontFamily: 'Nova Square',
-            fontSize: 60,
+        this.add.text(centerX, 150, "Hoeveel Spelers?", {
+            fontFamily: 'Nova Square, sans-serif',
+            fontSize: 80,
             color: '#fbf9fcff',
         }).setOrigin(0.5);
 
-        this.players3back = this.add.image(455, 385, 'back-3p');
-        this.players3back.setScale(1);
-        this.players3front = this.add.image(455, 385, 'front-3p');
-        this.players3front.setScale(1);
-        this.players2back = this.add.image(1070, 385, 'back-2p');
-        this.players2back.setScale(1);
-        this.players2front = this.add.image(1070, 385, 'front-2p');
-        this.players2front.setScale(1);
+        //PLAYERS OPTIONS
+        const optionsData = [
+            { count: 3, x: centerX - 310 },
+            { count: 2, x: centerX + 310 }
+        ];
+
+        this.playerSprites = {};
+
+        optionsData.forEach(({ count, x }) => {
+            const back = this.add.image(x, this.scale.height / 2, `back-${count}p`).setScale(1);
+            const front = this.add.image(x, this.scale.height / 2, `front-${count}p`).setScale(1);
+            this.playerSprites[count] = { back, front };
+        });
 
         //BUTTONS
         const buttonY = this.scale.height / 2 + 250;
-        const bw = 280;
-        const bh = 110;
-
-        this.drawPlayerButton(centerX - 310, buttonY, "3 Spelers", () => {
-            PlayersNum.players = 3;
-            this.scene.start('AnimationOne');
+        this.button3P = new Button(this, {
+            x: this.playerSprites[3].back.x,
+            y: buttonY,
+            label: '3 SPELERS',
+            data: { players: 3 },
+            onClick: (data) => this.startGame(data.players)
         });
 
-        this.drawPlayerButton(centerX + 310, buttonY, "2 Spelers", () => {
-            PlayersNum.players = 2;
-            this.scene.start('AnimationOne');
+        this.button2P = new Button(this, {
+            x: this.playerSprites[2].back.x,
+            y: buttonY,
+            label: '2 SPELERS',
+            data: { players: 2 },
+            onClick: (data) => this.startGame(data.players)
         });
 
-        //WAND
+        this.options = [
+            {
+                image: this.playerSprites[3].front,
+                hitAreas: [
+                    () => this.playerSprites[3].front.getBounds(),
+                    () => this.button3P.zone.getBounds()
+                ],
+                onSelect: () => this.startGame(3)
+            },
+            {
+                image: this.playerSprites[2].front,
+                hitAreas: [
+                    () => this.playerSprites[2].front.getBounds(),
+                    () => this.button2P.zone.getBounds()
+                ],
+                onSelect: () => this.startGame(2)
+            }
+        ];
+
+        this.prevZ = 0;
+
+        //WAND CONTROL ANIMATION
+        if (!this.anims.exists('wand-move')) {
+            this.anims.create({
+                key: 'wand-move',
+                frames: [
+                    { key: 'wand-move', frame: 0 },
+                    { key: 'wand-move', frame: 1 },
+                    { key: 'wand-move', frame: 2 },
+                    { key: 'wand-move', frame: 1 },
+                    { key: 'wand-move', frame: 0 }
+                ],
+                frameRate: 4,
+                repeat: -1
+            });
+        }
+
+        const wand = this.add.sprite(
+            this.scale.width / 2,
+            this.scale.height / 2,
+            'wand-move'
+        );
+        wand.setScale(0.09);
+        wand.setOrigin(0.5);
+        wand.setDepth(50);
+        wand.play('wand-move');
+
+
+        //WAND TARGET
         this.wand = new Wand(this);
 
         this.input.on("pointermove", (pointer) => {
@@ -67,29 +126,39 @@ export class Players extends Scene {
         });
     }
 
+    startGame(playerCount) {
+        PlayersNum.players = playerCount;
+        this.scene.start('AnimationOne');
+    }
+
     update(time, delta) {
         this.wand.update(time, delta);
+
+        const wandCircle = new Phaser.Geom.Circle(this.wand.x, this.wand.y, 20);
+        const z = Input.z;
+
+        let hoveredOption = null;
+
+        this.options.forEach(opt => {
+            opt.image.setAlpha(0.6);
+
+            const isOver = opt.hitAreas.some(getBounds =>
+                Phaser.Geom.Intersects.CircleToRectangle(
+                    wandCircle,
+                    getBounds()
+                )
+            );
+
+            if (isOver) {
+                opt.image.setAlpha(1);
+                hoveredOption = opt;
+            }
+        });
+
+        if (z === 1 && this.prevZ === 0 && hoveredOption) {
+            hoveredOption.onSelect();
+        }
+
+        this.prevZ = z;
     }
-
-    drawPlayerButton(x, y, label, onClick) {
-        const bw = 270;
-        const bh = 80;
-
-        const bg = this.add.graphics();
-        bg.fillStyle(0xdedcff, 1);
-        bg.lineStyle(6, 0x000000);
-        bg.fillRoundedRect(x - bw / 2, y - bh / 2, bw, bh, 25);
-        bg.strokeRoundedRect(x - bw / 2, y - bh / 2, bw, bh, 25);
-
-        const text = this.add.text(x, y, label, {
-            fontFamily: "Nunito",
-            fontSize: 23,
-            fontStyle: "bold",
-            color: "#000000"
-        }).setOrigin(0.5);
-
-        const zone = this.add.zone(x, y, bw, bh).setOrigin(0.5).setInteractive();
-        zone.on("pointerdown", onClick);
-    }
-
 }

@@ -11,15 +11,13 @@ export class AnimationTwo extends Scene {
             this.scale.height / 2,
             'part2'
         );
-
         video.play();
 
+        // video size 3840 x 2160
+        const targetHeight = this.scale.height / 8;
+        const ratio = video.width / video.height;
 
-        // video.setDisplaySize(3840, 2160);
-        video.setDisplaySize(100, 100);
-
-
-        // Auto-next scene
+        video.setDisplaySize(targetHeight * ratio, targetHeight);
         video.on('complete', () => {
             this.scene.start('Game');
         });

@@ -1,42 +1,10 @@
-// export default class TimerBar {
-//     constructor(scene, timer) {
-//         this.scene = scene;
-//         this.timer = timer;
-
-//         this.container = scene.add.container(0, 0).setDepth(100);
-
-//         this.bg = scene.add.graphics();
-//         this.bg.lineStyle(8, 0xffffff, 1);
-//         this.bg.strokeRoundedRect(50, 40, 500, 40, 20);
-//         this.container.add(this.bg);
-
-
-//         this.fill = scene.add.graphics();
-//         this.container.add(this.fill);
-
-
-//         this.container.setScale(0.6)
-//         this.container.x = 1000 - 20;
-//         this.container.y = 10;
-//     }
-
-//     update() {
-//         const timeLeft = Math.ceil(this.timer.getTimeLeft());
-
-//         const maxWidth = 500;
-//         const percent = this.timer.getTimeLeft() / this.timer.duration;
-
-//         this.fill.clear();
-//         this.fill.fillStyle(0x4a6fa5, 1);
-//         this.fill.fillRoundedRect(50, 40, maxWidth * percent, 40, 20);
-//     }
-// }
-
 export default class TimerBar {
     constructor(scene, timer, config = {}) {
         this.scene = scene;
         this.timer = timer;
 
+        this.container = scene.add.container(0, 0);
+        this.container.setDepth(100);
 
         this.x = scene.scale.width - 50;
         this.y = scene.scale.height -260;
@@ -44,7 +12,7 @@ export default class TimerBar {
         this.wandOutline = scene.add.image(this.x, this.y, 'wand-lines');
         this.wandOutline.setOrigin(0.5, 1);
         this.wandOutline.setDepth(100);
-        this.wandOutline.setScale(0.1);
+        this.wandOutline.setScale(0.15);
         this.wandOutline.postFX.addGlow(0xffffff, 0.5, 5, 0.5);
         this.wandOutline.scene.tweens.add({
             targets: this.wandOutline.glowFX,
@@ -58,7 +26,7 @@ export default class TimerBar {
         this.wandFill = scene.add.image(this.x, this.y, 'wand');
         this.wandFill.setOrigin(0.5, 1);
         this.wandFill.setDepth(99);
-        this.wandFill.setScale(0.1);
+        this.wandFill.setScale(0.15);
 
         this.maskGraphics = scene.add.graphics();
         this.maskGraphics.setDepth(101);

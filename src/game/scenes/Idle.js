@@ -1,6 +1,8 @@
 import { Scene } from 'phaser';
 import Wand from '../prefabs/wand.js';
 import { Serial } from '../utils/Serial.js';
+import { Input } from '../utils/Input.js';
+import Button from '../utils/Button.js';
 
 export class Idle extends Scene {
     constructor() {
@@ -8,96 +10,101 @@ export class Idle extends Scene {
     }
 
     create() {
-        // this.bg = this.add.image(0, 0, 'background')
-        //     .setOrigin(0)
-        //     .setDepth(-10);
+        const centerX = this.scale.width / 2;
+        const centerY = this.scale.height / 2;
 
-        // this.overlay = this.add.rectangle(
-        //     0, 0,
-        //     0, 0,
-        //     0x000000,
-        //     0.5
-        // ).setOrigin(0);
+        // VIDEO
+        this.video = this.add.video(centerX, centerY, 'idle');
+        this.video.setMute(true).setLoop(true).play();
 
-        const video = this.add.video(
-            this.scale.width / 2,
-            this.scale.height / 2,
-            'idle'
-        );
-
-        video.play(true);
-        video.setDisplaySize(100, 100);
-        video.setDepth(-10);
-
+        const targetHeight = this.scale.height / 8;
+        const ratio = this.video.width / this.video.height;
+        this.video.setDisplaySize(targetHeight * ratio, targetHeight);
+        this.video.setDepth(-10);
 
         this.scale.on('resize', ({ width, height }) => {
             this.resize(width, height);
         });
 
-        const centerX = this.scale.width / 2;
-        const buttonY = this.scale.height / 2 + 100;
-
         // TITLE
         this.title = this.add.text(centerX, 190, 'Mistique Minis', {
-            fontFamily: "Nova Square",
+            fontFamily: '"Nova Square", sans-serif',
             fontSize: '130px',
             color: '#fbf9fcff',
         }).setOrigin(0.5);
 
         // BUTTON
-        const bw = 300, bh = 90;
-        const bx = centerX - bw / 2;
-        const by = buttonY - bh / 2;
+        this.startButton = new Button(this, {
+            x: centerX,
+            y: centerY + 200,
+            label: 'START',
+            onClick: () => this.startGame()
+        });
 
-        const buttonBg = this.add.graphics();
-        buttonBg.fillStyle(0xdedcff, 1);
-        buttonBg.fillRoundedRect(bx, by, bw, bh, 30);
-        buttonBg.lineStyle(6, 0x000000);
-        buttonBg.strokeRoundedRect(bx, by, bw, bh, 30);
+        //WAND ANIMATION
+        if (!this.anims.exists('wand-move')) {
+            this.anims.create({
+                key: 'wand-move',
+                frames: [
+                    { key: 'wand-move', frame: 0 },
+                    { key: 'wand-move', frame: 1 },
+                    { key: 'wand-move', frame: 2 },
+                    { key: 'wand-move', frame: 1 },
+                    { key: 'wand-move', frame: 0 }
+                ],
+                frameRate: 4,
+                repeat: -1
+            });
+        }
+        const wand = this.add.sprite(
+            this.scale.width / 2,
+            this.scale.height / 2,
+            'wand-move'
+        );
+        wand.setScale(0.09);
+        wand.setOrigin(0.5);
+        wand.setDepth(50);
 
-        this.add.text(centerX, buttonY, "START", {
-            fontFamily: "Nunito",
-            fontSize: 40,
-            fontStyle: "bold",
-            color: "#000000"
-        }).setOrigin(0.5);
+        wand.play('wand-move');
 
-        const buttonZone = this.add.zone(centerX, buttonY, bw, bh)
-            .setOrigin(0.5)
-            .setInteractive();
-        buttonZone.on("pointerdown", () => this.scene.start("Players"));
-
-        // WAND
+        // WAND CONTROL
         this.wand = new Wand(this);
+        this.prevZ = 0;
 
-        this.input.on("pointermove", p => {
+        this.input.on('pointermove', p => {
             if (!Serial || !Serial.port) {
                 this.wand.setPosition(p.x, p.y);
             }
         });
 
-        this.input.on("pointerdown", () => {
-            this.mouseCasting = true;
+        this.input.on('pointerdown', () => {
+            if (!Serial || !Serial.port) this.mouseCasting = true;
         });
 
-        this.input.on("pointerup", () => {
-            this.mouseCasting = false;
+        this.input.on('pointerup', () => {
+            if (!Serial || !Serial.port) this.mouseCasting = false;
         });
 
-        // this.resize(this.scale.width, this.scale.height);
+        this.input.keyboard.on('keydown-F', () => {
+            if (this.scale.isFullscreen) {
+                this.scale.stopFullscreen();
+            } else {
+                this.scale.startFullscreen();
+            }
+        });
     }
 
-    // resize(width, height) {
-    //     this.bg.displayWidth = width;
-    //     this.bg.displayHeight = height;
+    startGame() {
+        this.scene.start('Players');
+    }
 
-    //     this.overlay.width = width;
-    //     this.overlay.height = height;
-    // }
-
+    resize(width, height) {
+        this.video.setPosition(width / 2, height / 2);
+        this.video.setDisplaySize(width, height);
+    }
 
     update(time, delta) {
         this.wand.update(time, delta);
-
+        this.startButton.update(this.wand);
     }
 }

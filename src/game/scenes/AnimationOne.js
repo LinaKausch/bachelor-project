@@ -13,10 +13,9 @@ export class AnimationOne extends Scene {
         );
 
         video.play();
-
-        // video size: (3840, 2160);
-        video.setDisplaySize(100, 100);
-
+        const targetHeight = this.scale.height / 8;
+        const ratio = video.width / video.height;
+        video.setDisplaySize(targetHeight * ratio, targetHeight);
         video.on('complete', () => {
             this.scene.start('Potions');
         });

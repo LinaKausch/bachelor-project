@@ -1,13 +1,11 @@
 import { GameObjects } from 'phaser';
 
 export default class Player extends GameObjects.Sprite {
-
     constructor(scene, x = 200, y = 200) {
         super(scene, x, y, 'fly');
         scene.add.existing(this);
 
         this.anims.play('fly-idle');
-
         this.setScale(0.16);
 
         this.floatOffset = 0;
@@ -23,32 +21,32 @@ export default class Player extends GameObjects.Sprite {
         this.speed = 300;
         this.baseY = this.y;
 
-        // gravity-fall state (enabled only when caught)
         this.isFalling = false;
         this.isGrounded = false;
         this.vy = 0;
-        this.gravity = 1200; // px/s^2
+        this.gravity = 1200;
         this.groundY = scene.scale.height - 60;
     }
 
     setDirection(dir) {
-        if (this.isFalling) return; // no control while falling
-        this.joyX = 0;
-        this.joyY = 0;
+        if (this.isFalling) return;
 
-        switch (dir) {
-            case "up": this.joyY = -1; break;
-            case "down": this.joyY = 1; break;
-            case "left": this.joyX = -1; break;
-            case "right": this.joyX = 1; break;
-            case "up-left": this.joyX = -1; this.joyY = -1; break;
-            case "up-right": this.joyX = 1; this.joyY = -1; break;
-            case "down-left": this.joyX = -1; this.joyY = 1; break;
-            case "down-right": this.joyX = 1; this.joyY = 1; break;
-            default: break;
-        }
+        const directionMap = {
+            'up': { x: 0, y: -1 },
+            'down': { x: 0, y: 1 },
+            'left': { x: -1, y: 0 },
+            'right': { x: 1, y: 0 },
+            'up-left': { x: -1, y: -1 },
+            'up-right': { x: 1, y: -1 },
+            'down-left': { x: -1, y: 1 },
+            'down-right': { x: 1, y: 1 },
+            'none': { x: 0, y: 0 }
+        };
+
+        const direction = directionMap[dir] || { x: 0, y: 0 };
+        this.joyX = direction.x;
+        this.joyY = direction.y;
     }
-
 
     update(time, delta) {
         const dt = delta / 1000;
@@ -65,7 +63,6 @@ export default class Player extends GameObjects.Sprite {
                 this.vy = 0;
             }
         } else if (this.isGrounded) {
-            // locked on ground - no y updates, but can move horizontally
             if (this.joyX != null) {
                 this.x += this.joyX * (this.speed / 4) * dt;
             }
@@ -79,18 +76,13 @@ export default class Player extends GameObjects.Sprite {
             this.y = this.baseY + this.floatOffset;
         }
 
-        if (this.joyX === 0) {
-            if (this.anims.currentAnim?.key !== 'fly-idle') {
-                this.anims.play('fly-idle', true);
-            }
-        } else if (this.joyX > 0) {
-            if (this.anims.currentAnim?.key !== 'fly-right') {
-                this.anims.play('fly-right', true);
-            }
-        } else if (this.joyX < 0) {
-            if (this.anims.currentAnim?.key !== 'fly-left') {
-                this.anims.play('fly-left', true);
-            }
+        const currentAnim = this.anims.currentAnim?.key;
+        if (this.joyX === 0 && currentAnim !== 'fly-idle') {
+            this.anims.play('fly-idle', true);
+        } else if (this.joyX > 0 && currentAnim !== 'fly-right') {
+            this.anims.play('fly-right', true);
+        } else if (this.joyX < 0 && currentAnim !== 'fly-left') {
+            this.anims.play('fly-left', true);
         }
 
         const padding = 70;
@@ -98,7 +90,6 @@ export default class Player extends GameObjects.Sprite {
         if (!this.isFalling) {
             this.baseY = Phaser.Math.Clamp(this.baseY, padding, this.scene.scale.height - padding);
         }
-
     }
 
     startGravityFall(groundY) {

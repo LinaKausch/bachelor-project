@@ -39,47 +39,38 @@ export class Potions extends Scene {
         this.prevBtn2 = 0;
 
         creatureAnimation(this);
-
-        // Ensure wiggle pipeline is available for previews in this scene
         initWiggle(this);
 
+        //POTION SELECTION CARD
         const card = this.add.image(
             this.scale.width / 2,
             this.scale.height / 2,
             'potion-bg'
         ).setDepth(5).setScale(0.5, 0.4);
 
+        //TITLE
         this.add.text(
             card.x,
             card.y - card.displayHeight / 2 + 50,
             'Selecteer jouw toverdrankje',
             {
-                fontFamily: 'Arial Black',
+                fontFamily: '"Nunito", sans-serif',
                 fontSize: '26px',
                 color: '#2e2a3a'
             }
         ).setOrigin(0.5).setDepth(6);
 
 
-        //BORDERS
+        //SELECTION BORDERS
         this.p1Border = this.add.image(0, 0, 'p1-frame').setDepth(25).setScale(0.4);
-        // this.p1Border.lineStyle(6, 0x5DA9FF, 1);
-
-
         this.p2Border = this.add.image(0, 0, 'p2-frame').setDepth(25).setScale(0.4);
-        // this.p2Border.lineStyle(6, 0xFFE45D, 1);
-
 
         this.selected1 = 0;
         this.selected2 = 3;
 
         //POTIONS
-        this.potion1 = this.add.image(0, 0, 'glow');
-        this.potion2 = this.add.image(0, 0, 'grow');
-        this.potion3 = this.add.image(0, 0, 'trace');
-        this.potion4 = this.add.image(0, 0, 'colour');
-
-        this.potions = [this.potion1, this.potion2, this.potion3, this.potion4];
+        const potionKeys = ['glow', 'grow', 'trace', 'colour'];
+        this.potions = potionKeys.map(key => this.add.image(0, 0, key));
         this.spacing = 150;
         this.y = this.scale.height / 2 + 20;
         this.totalWidth = this.spacing * (this.potions.length - 1);
@@ -93,25 +84,15 @@ export class Potions extends Scene {
         });
 
 
-        //MOUSE CONTROL
-        this.potion1.setInteractive();
-        this.potion2.setInteractive();
-        this.potion3.setInteractive();
-        this.potion4.setInteractive();
+        //MOUSE HOVER
+        this.potions.forEach((potion, index) => {
+            potion.setInteractive();
+            potion.on('pointerover', () => this.previewPower(this.player1, index));
+            potion.on('pointerout', () => this.clearPowers(this.player1));
+        });
 
-        this.potion1.on('pointerover', () => { glowOn(this.player1); });
-        this.potion1.on('pointerout', () => { glowOff(this.player1); });
-
-        this.potion2.on('pointerover', () => { growOn(this.player1); });
-        this.potion2.on('pointerout', () => { growOff(this.player1); });
-
-        this.potion3.on('pointerover', () => { wiggleOn(this.player1); });
-        this.potion3.on('pointerout', () => { wiggleOff(this.player1); });
-
-        this.potion4.on('pointerover', () => { colorOn(this.player1); });
-        this.potion4.on('pointerout', () => { colorOff(this.player1); });
-
-
+ 
+        //DEMO
         this.add.video(
             this.scale.width / 2,
             this.scale.height - 100,
@@ -119,78 +100,23 @@ export class Potions extends Scene {
         ).setScale(0.2).play(true);
 
         //PLAYERS
-        this.add.image(
-            250,
-            150,
-            'title-e'
-        ).setOrigin(0.5).setScale(0.4);
-
-        this.add.image(
-            this.scale.width - 250,
-            150,
-            'title-e'
-        ).setOrigin(0.5).setScale(0.4);
-
-        this.add.text(
-             250,
-            130,
-            'Speler 1',
-            {
-                fontFamily: 'Arial Black',
-                fontSize: '24px',
-                color: '#1E192F'
-            }
-        ).setOrigin(0.5).setDepth(50);
-
-        this.add.text(
-            this.scale.width - 250,
-            130,
-            'Speler 2',
-            {
-                fontFamily: 'Arial Black',
-                fontSize: '24px',
-                color: '#1E192F'
-            }
-        ).setOrigin(0.5).setDepth(50);
-
-        this.add.text(
-            250,
-            165,
-             "Flapke",
-            {
-                fontFamily: 'Arial Black',
-                fontSize: '20px',
-                color: '#2347C2'
-            }
-        ).setOrigin(0.5).setDepth(50);
-
-        this.add.text(
-            this.scale.width - 250,
-            165,
-            "Snufke",
-            {
-                fontFamily: 'Arial Black',
-                fontSize: '20px',
-                color: '#2347C2'
-            }
-        ).setOrigin(0.5).setDepth(50);
-
         this.players = [];
+        
+        const playerData = [
+            { x: 350, label: 'Speler 1', name: 'Flapke' },
+            ...(PlayersNum.players === 3 ? [{ x: this.scale.width - 350, label: 'Speler 2', name: 'Snufke' }] : [])
+        ];
 
-        const p1 = new Player(this, 250, this.scale.height / 2);
-        p1.setScale(0.3);
-        p1.setVisible(true);
-        p1.active = true;
-        p1.setOrigin(0.5);
-        this.players.push(p1);
+        playerData.forEach(data => {
+            this.createPlayerUI(data.x, data.label, data.name);
+            const player = new Player(this, data.x, this.scale.height / 2);
+            player.setScale(0.3).setVisible(true).setOrigin(0.5);
+            player.active = true;
+            this.players.push(player);
+        });
 
-        if (PlayersNum.players === 3) {
-            const p2 = new Player(this, this.scale.width - 250, this.scale.height / 2);
-            p2.setScale(0.3);
-            p2.setVisible(true);
-            p2.active = true;
-            this.players.push(p2);
-        }
+        this.p1Status = this.statusTexts[0];
+        this.p2Status = this.statusTexts[1] || null;
 
         this.player1 = this.players[0];
         this.player2 = this.players[1] ?? null;
@@ -202,41 +128,12 @@ export class Potions extends Scene {
 
         this.updateBorders();
 
-        this.p1Status = this.add.text(250, this.scale.height / 2 + 200, 'NIET KLAAR', {
-            fontFamily: 'Arial black',
-            fontSize: '24px',
-            color: '#ffffff'
-        }).setOrigin(0.5);
-
-        this.p2Status = this.player2
-            ? this.add.text(this.scale.width - 250, this.scale.height / 2 + 200, 'NIET KLAAR', {
-                fontFamily: 'Arial black',
-                fontSize: '24px',
-                color: '#ffffff'
-            }).setOrigin(0.5) : null;
-
-
-
-
-        // this.input.once("pointerdown", () => {
-
-        //RANDOM POTION
-        // if (this.selected1 === null || this.selected1 === undefined) {
-        //     this.selected1 = Phaser.Math.Between(0, 3);
-        // }
-        // if (PlayersNum.players === 3) {
-        //     if (this.selected2 === null || this.selected2 === undefined) {
-        //         this.selected2 = Phaser.Math.Between(0, 3);
-        //     }
-        // }
-
         //TIMER
         this.timer = new Timer(20);
-        this.timerBar = new TimerBar(this, this.timer, { direction: 'horizontal' });
+        this.timerBar = new TimerBar(this, this.timer);
         this.timer.start();
 
         this.timer.onComplete = () => {
-            console.log("Potion time is up!");
 
             if (!this.p1Locked) {
                 this.selected1 = Phaser.Math.Between(0, 3);
@@ -271,40 +168,10 @@ export class Potions extends Scene {
             this.player2.update(time, delta);
         }
 
-        //PLAYER 1
-        if (joystickDir1 === "left" && !this.p1LeftHeld) {
-            this.selected1 = Math.max(0, this.selected1 - 1);
-            this.p1LeftHeld = true;
-            this.previewPower(this.player1, this.selected1);
-            this.updateBorders();
+        this.handleJoystick(joystickDir1, 1);
+        if (PlayersNum.players === 3) {
+            this.handleJoystick(joystickDir2, 2);
         }
-        if (joystickDir1 !== "left") this.p1LeftHeld = false;
-
-
-        if (joystickDir1 === "right" && !this.p1RightHeld) {
-            this.selected1 = Math.min(3, this.selected1 + 1);
-            this.previewPower(this.player1, this.selected1);
-            this.p1RightHeld = true;
-            this.updateBorders();
-        }
-        if (joystickDir1 !== "right") this.p1RightHeld = false;
-
-        // PLAYER 2 
-        if (joystickDir2 === "left" && !this.p2LeftHeld) {
-            this.selected2 = Math.max(0, this.selected2 - 1);
-            this.p2LeftHeld = true;
-            this.previewPower(this.player2, this.selected2)
-            this.updateBorders();
-        }
-        if (joystickDir2 !== "left") this.p2LeftHeld = false;
-
-        if (joystickDir2 === "right" && !this.p2RightHeld) {
-            this.selected2 = Math.min(3, this.selected2 + 1);
-            this.previewPower(this.player2, this.selected2)
-            this.p2RightHeld = true;
-            this.updateBorders();
-        }
-        if (joystickDir2 !== "right") this.p2RightHeld = false;
 
         // BUTTONS
         if (!this.p1Locked && btn1 === 1 && this.prevBtn1 === 0) {
@@ -327,13 +194,61 @@ export class Potions extends Scene {
         this.prevBtn2 = btn2;
     }
 
+    createPlayerUI(x, label, name) {
+        if (!this.statusTexts) this.statusTexts = [];
+
+        this.add.image(x, 200, 'title-e').setOrigin(0.5).setScale(0.4);
+
+        this.add.text(x, 180, label, {
+            fontFamily: '"Nunito", sans-serif',
+            fontSize: '24px',
+            color: '#1E192F'
+        }).setOrigin(0.5).setDepth(50);
+
+        this.add.text(x, 215, name, {
+            fontFamily: '"Nunito", sans-serif',
+            fontSize: '20px',
+            color: '#2347C2'
+        }).setOrigin(0.5).setDepth(50);
+
+        const statusText = this.add.text(x, this.scale.height / 2 + 200, 'NIET KLAAR', {
+            fontFamily: '"Nunito", sans-serif',
+            fontSize: '24px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+
+        this.statusTexts.push(statusText);
+    }
+
+    handleJoystick(direction, playerNum) {
+        const selectedKey = playerNum === 1 ? 'selected1' : 'selected2';
+        const leftHeldKey = `p${playerNum}LeftHeld`;
+        const rightHeldKey = `p${playerNum}RightHeld`;
+        const player = playerNum === 1 ? this.player1 : this.player2;
+
+        if (direction === 'left' && !this[leftHeldKey]) {
+            this[selectedKey] = Math.max(0, this[selectedKey] - 1);
+            this[leftHeldKey] = true;
+            this.previewPower(player, this[selectedKey]);
+            this.updateBorders();
+        }
+        if (direction !== 'left') this[leftHeldKey] = false;
+
+        if (direction === 'right' && !this[rightHeldKey]) {
+            this[selectedKey] = Math.min(3, this[selectedKey] + 1);
+            this[rightHeldKey] = true;
+            this.previewPower(player, this[selectedKey]);
+            this.updateBorders();
+        }
+        if (direction !== 'right') this[rightHeldKey] = false;
+    }
 
     updateBorders = () => {
         const p1 = this.potions[this.selected1];
         if (p1) {
             this.p1Border.setVisible(true);
             this.p1Border.setPosition(p1.x, p1.y);
-            this.p1Border.setScale(0.5 * (p1.scaleX / 0.1)); // keep frame proportional if you change potion scale
+            this.p1Border.setScale(0.5 * (p1.scaleX / 0.1));
         }
 
         if (PlayersNum.players === 3 && this.selected2 != null) {
@@ -348,11 +263,15 @@ export class Potions extends Scene {
         }
     }
 
-    previewPower(player, potionIndex) {
+    clearPowers(player) {
         glowOff(player);
         growOff(player);
         wiggleOff(player);
         colorOff(player);
+    }
+
+    previewPower(player, potionIndex) {
+        this.clearPowers(player);
 
         switch (potionIndex) {
             case 0: glowOn(player); break;
@@ -364,12 +283,7 @@ export class Potions extends Scene {
 
     applyPower(playerNumber, potionIndex) {
         const player = playerNumber === 1 ? this.player1 : this.player2;
-
-
-        glowOff(player);
-        growOff(player);
-        wiggleOff(player);
-        colorOff(player);
+        this.clearPowers(player);
 
         switch (potionIndex) {
             case 0: glowOn(player); break;
@@ -382,7 +296,7 @@ export class Potions extends Scene {
 
         if (this.p1Locked && this.p2Locked) {
             this.time.delayedCall(300, () => {
-                this.scene.start("Game");
+                this.scene.start("AnimationTwo");
             });
         }
 

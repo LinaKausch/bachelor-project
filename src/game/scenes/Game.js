@@ -4,18 +4,16 @@ import Npc from '../prefabs/npc.js';
 import Timer from '../utils/Timer.js';
 import Wand from '../prefabs/wand.js';
 import { Serial } from '../utils/Serial.js';
-import Counter from '../utils/PlayerCounter.js';
+import PlayerCounter from '../utils/PlayerCounter.js';
 import { creatureAnimation } from '../utils/CreatureAnimation.js';
 import { wiggleOn, wiggleOff, initWiggle, updateWiggle } from '../powers/Wiggle.js';
 import { glowOn, glowOff } from '../powers/Glow.js';
 import { growOn, growOff } from '../powers/Grow.js';
 import { colorOn, colorOff } from '../powers/Color.js';
 import { Input } from '../utils/Input.js';
-import { ChosenPowers } from "../utils/ChosenPowers.js";
+import { ChosenPowers } from '../utils/ChosenPowers.js';
 import { PlayersNum } from '../utils/PlayersNum.js';
-import TimerBar from "../utils/TimerBar.js";
-import PlayerCounter from "../utils/PlayerCounter.js";
-import WigglePipeline from '../shaders/WigglePipeline.js';
+import TimerBar from '../utils/TimerBar.js';
 
 
 export class Game extends Scene {
@@ -30,34 +28,42 @@ export class Game extends Scene {
         this.bg.displayHeight = this.scale.height;
         this.bg.setDepth(-10);
 
-        // Remove ground falling behavior; keep original gameplay
-
         creatureAnimation(this);
-
-        // Initialize the wiggle pipeline via the Wiggle power module (handles renderer checks)
         initWiggle(this);
 
         this.gameOn = true;
         this.player1Found = false;
         this.player2Found = false;
 
+        //DEMO
+        const demo = this.add.video(
+            this.scale.width / 2,
+            this.scale.height - 90,
+            'game-demo'
+        );
+
+        demo
+            .setOrigin(0.5)
+            .setScale(0.7)
+            .setDepth(5)
+            .setMute(true)
+            .play();
+
+        this.time.delayedCall(3500, () => {
+            demo.stop();
+            demo.destroy();
+        });
+
+        //PLAYERS
         const creatureCount = PlayersNum.players === 3 ? 2 : 1;
         this.playerCounter = new PlayerCounter(this, creatureCount);
 
         const player1X = Phaser.Math.Between(100, this.scale.width - 100);
         const player1Y = Phaser.Math.Between(100, this.scale.height - 100);
-        const player2X = Phaser.Math.Between(100, this.scale.width - 100);
-        const player2Y = Phaser.Math.Between(100, this.scale.height - 100);
 
-        // PLAYER 1
         this.player1 = new Player(this, player1X, player1Y);
         this.player1.setInteractive();
-        this.joystickDir1 = "none";
-        this.blueBtn = 0;
-        this.prevBlue = 0;
-
-        //PLAYER 2
-        this.player2 = new Player(this, player2X, player2Y);
+        this.player2 = new Player(this, Phaser.Math.Between(100, this.scale.width - 100), Phaser.Math.Between(100, this.scale.height - 100));
         this.player2.setInteractive();
 
         if (PlayersNum.players === 2) {
@@ -66,18 +72,16 @@ export class Game extends Scene {
             this.player2Found = true;
         }
 
-        this.joystickDir2 = "none";
+        this.joystickDir1 = 'none';
+        this.joystickDir2 = 'none';
+        this.blueBtn = 0;
         this.yellowBtn = 0;
+        this.prevBlue = 0;
         this.prevYellow = 0;
 
+        // ANTIPOWERS
         this.applyChosenPower(this.player1, ChosenPowers.p1);
         this.applyChosenPower(this.player2, ChosenPowers.p2);
-
-
-        this.keys = this.input.keyboard.addKeys({
-            enter: Phaser.Input.Keyboard.KeyCodes.ENTER,
-            space: Phaser.Input.Keyboard.KeyCodes.SPACE
-        });
 
         this.tempOff = (player, offFn, onFn, seconds, cooldown) => {
             if (player._isOnCooldown) return;
@@ -96,21 +100,7 @@ export class Game extends Scene {
                     player._isOnCooldown = false;
                 });
             });
-        }
-
-
-        this.emitter = this.add.particles(0, 0, 'particle', {
-            lifespan: 300,
-            speed: { min: -100, max: 100 },
-            scale: { start: 1, end: 0 },
-            quantity: 0
-        });
-
-        // glowOn(this.player1);
-
-
-        // glowOn(this.player2);
-
+        };
 
         // NPC
         this.npcs = [];
@@ -127,51 +117,24 @@ export class Game extends Scene {
         //TARGET
         this.wand = new Wand(this);
 
-        // Mouse (only active when no serial port is connected)
-        this.input.on("pointermove", (pointer) => {
+        this.input.on('pointermove', (pointer) => {
             if (!Serial || !Serial.port) {
                 this.wand.x = pointer.x;
                 this.wand.y = pointer.y;
             }
         });
-        this.input.on("pointerdown", () => {
+        this.input.on('pointerdown', () => {
             if (!Serial || !Serial.port) this.mouseCasting = true;
         });
-
-        this.input.on("pointerup", () => {
+        this.input.on('pointerup', () => {
             if (!Serial || !Serial.port) this.mouseCasting = false;
         });
-        //
 
         // TIMER
-        this.timer = new Timer(30);
-        if (PlayersNum.players === 3) {
-            this.timer = new Timer(50);
-        }
+        const timerDuration = PlayersNum.players === 3 ? 50 : 30;
+        this.timer = new Timer(timerDuration);
         this.timerBar = new TimerBar(this, this.timer, { direction: 'vertical' });
         this.timer.start();
-
-
-        // //COOLDOWN
-        // this.playerCounter.cooldowns[0].cooldown = 5;
-        // if (PlayersNum.players === 3) {
-        //     this.playerCounter.cooldowns[1].cooldown = 5;
-        // }
-
-        // this.timerText = this.add.text(20, 20, "Time: 120", {
-        //     fontSize: "32px",
-        //     fontFamily: "Arial",
-        //     color: "#ffffff"
-        // });
-
-        //COUNTER
-        // this.creatureCounter = new Counter(2);
-        // this.counterText = this.add.text(20, 60, "Found: 0 / 2", {
-        //     fontSize: "32px",
-        //     fontFamily: "Arial",
-        //     color: "#ffffff"
-        // });
-
     }
 
     checkWandHit(player) {
@@ -179,17 +142,10 @@ export class Game extends Scene {
         return Phaser.Geom.Intersects.CircleToRectangle(circle, player.getBounds());
     }
 
-    findCreature() {
-        this.creatureCounter.add();
-        console.log('Found:', this.creatureCounter.get());
-    }
-
     update(time, delta) {
         const dt = delta / 1000;
         const tsec = time / 1000;
         updateWiggle(tsec);
-
-        // Update wiggle shader time uniform via the Wiggle module
 
         this.joystickDir1 = Input.joy1;
         this.joystickDir2 = Input.joy2;
@@ -201,22 +157,10 @@ export class Game extends Scene {
 
 
         if (this.blueBtn === 1 && this.prevBlue === 0) {
-            // const power = this.getPower(ChosenPowers.p1);
-            // if (power) this.tempOff(this.player1, power.off, power.on, 10, 5);
-            const power = this.getPower(ChosenPowers.p1);
-            if (power) {
-                this.playerCounter.startCooldown(0, 10, 5);
-                this.tempOff(this.player1, power.off, power.on, 10, 5);
-            }
+            this.activatePowerForPlayer(1, ChosenPowers.p1);
         }
         if (this.yellowBtn === 1 && this.prevYellow === 0) {
-            // const power = this.getPower(ChosenPowers.p2);
-            // if (power) this.tempOff(this.player2, power.off, power.on, 10, 5);
-            const power = this.getPower(ChosenPowers.p2);
-            if (power) {
-                this.playerCounter.startCooldown(1, 10, 5);
-                this.tempOff(this.player2, power.off, power.on, 10, 5);
-            }
+            this.activatePowerForPlayer(2, ChosenPowers.p2);
         }
         this.prevBlue = this.blueBtn;
         this.prevYellow = this.yellowBtn;
@@ -230,15 +174,23 @@ export class Game extends Scene {
         this.player1.update(time, delta);
         this.player2.update(time, delta);
 
+        if (this.player1.updateCage) this.player1.updateCage();
+        if (this.player2.updateCage) this.player2.updateCage();
+
         const cast = (this.zButton === 1) || this.mouseCasting;
 
         if (!this.player1Found && this.checkWandHit(this.player1) && cast) {
+            this.playCaughtAnimation();
+            this.attachCage(this.player1);
+            this.playerCounter.greyOutProfile(0);
             this.player1.startGravityFall(this.scale.height - 60);
             this.player1Found = true;
-
         }
 
         if (!this.player2Found && this.checkWandHit(this.player2) && cast) {
+            this.playCaughtAnimation();
+            this.attachCage(this.player2);
+            this.playerCounter.greyOutProfile(1);
             this.player2.startGravityFall(this.scale.height - 60);
             this.player2Found = true;
         }
@@ -248,7 +200,6 @@ export class Game extends Scene {
                 this.scene.start("GameOver", { result: "wizard" });
             });
         }
-
 
         this.npcs.forEach(npc =>
             npc.update(dt, this.scale.width, this.scale.height)
@@ -263,34 +214,71 @@ export class Game extends Scene {
         }
 
         this.wand.update(time, delta);
-
     }
 
     applyChosenPower(player, potionIndex) {
         if (potionIndex === null) return;
 
-        glowOff(player);
-        growOff(player);
-        wiggleOff(player);
-        colorOff(player);
+        const POWER_MAP = [
+            { on: glowOn, off: glowOff },
+            { on: growOn, off: growOff },
+            { on: wiggleOn, off: wiggleOff },
+            { on: colorOn, off: colorOff }
+        ];
 
-        switch (potionIndex) {
-            case 0: glowOn(player); break;
-            case 1: growOn(player); break;
-            case 2: wiggleOn(player); break;
-            case 3: colorOn(player); break;
+        POWER_MAP.forEach(p => p.off(player));
+        if (POWER_MAP[potionIndex]) {
+            POWER_MAP[potionIndex].on(player);
         }
     }
 
-    getPower(index) {
-        switch (index) {
-            case 0: return { on: glowOn, off: glowOff };
-            case 1: return { on: growOn, off: growOff };
-            case 2: return { on: wiggleOn, off: wiggleOff };
-            case 3: return { on: colorOn, off: colorOff };
-            default: return null;
+    activatePowerForPlayer(playerNum, potionIndex) {
+        const player = playerNum === 1 ? this.player1 : this.player2;
+        const power = [
+            { on: glowOn, off: glowOff },
+            { on: growOn, off: growOff },
+            { on: wiggleOn, off: wiggleOff },
+            { on: colorOn, off: colorOff }
+        ][potionIndex];
+
+        if (power) {
+            this.playerCounter.startCooldown(playerNum - 1, 10, 5);
+            this.tempOff(player, power.off, power.on, 10, 5);
         }
-    
+    }
+
+    playCaughtAnimation() {
+        const caughtVideo = this.add.video(
+            this.scale.width / 2,
+            this.scale.height - 90,
+            'caught'
+        );
+
+        caughtVideo
+            .setOrigin(0.5)
+            .setScale(0.5)
+            .setDepth(5)
+            .setMute(true)
+            .play();
+
+        this.time.delayedCall(3500, () => {
+            caughtVideo.stop();
+            caughtVideo.destroy();
+        });
+    }
+
+    attachCage(player) {
+        const cage = this.add.image(player.x, player.y, 'cage');
+        cage.setScale(0.1);
+        cage.setDepth(player.depth + 1);
+
+        player.cage = cage;
+
+        player.updateCage = () => {
+            if (player.cage) {
+                player.cage.setPosition(player.x, player.y);
+            }
+        };
     }
 
     endGame() {
