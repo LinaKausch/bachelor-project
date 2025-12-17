@@ -73,6 +73,6 @@ export class Preloader extends Scene {
         this.load.audio('game-music', 'sounds/game-music.mp3');
     }
     create() {
-        this.scene.start('Idle');
+        this.scene.start('Game');
     }
 }

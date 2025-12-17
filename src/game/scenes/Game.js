@@ -40,7 +40,7 @@ export class Game extends Scene {
 
         this.playSound = this.sound.add('game-music', { loop: true, volume: 0.5 });
         this.playSound.play();
-        
+
         this.gameOn = GameState.demoShown;
         this.player1Found = false;
         this.player2Found = false;
@@ -166,7 +166,7 @@ export class Game extends Scene {
         this.timer = new Timer(timerDuration);
         this.timerBar = new TimerBar(this, this.timer, { direction: 'vertical' });
 
-        if (this.skipIntro) {
+        if (this.skipIntro || GameState.demoShown) {
             this.timer.start();
         }
     }
@@ -232,7 +232,6 @@ export class Game extends Scene {
 
         if (!this.transitionScheduled && this.player1Found && this.player2Found) {
             this.transitionScheduled = true;
-            // Allow caught animation to finish before transitioning
             this.time.delayedCall(3500, () => {
                 this.scene.start("GameOver", { result: "wizard" });
             });
@@ -322,7 +321,7 @@ export class Game extends Scene {
         const p1Alive = !this.player1Found;
         const p2Alive = PlayersNum.players === 3 ? !this.player2Found : false;
 
-        const delayMs = 50000;
+        const delayMs = 500;
 
         if (!p1Alive && !p2Alive) {
             this.time.delayedCall(delayMs, () => {
