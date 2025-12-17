@@ -8,7 +8,7 @@ export const SerialElectron = {
         }
 
         window.arduino.onData((line) => {
-            console.log('📩 ELECTRON → RENDERER RAW:', line);
+            // console.log('📩 ELECTRON → RENDERER RAW:', line);
             if (!line) return;
 
             line = line.replace(/\r/g, "").replace(/\0/g, "");
@@ -31,7 +31,7 @@ export const SerialElectron = {
                 Input.accY = data.accY;
                 Input.z = data.z;
 
-                console.log('🎮 INPUT UPDATED', Input);
+                // console.log('🎮 INPUT UPDATED', Input);
 
 
             } catch (e) {

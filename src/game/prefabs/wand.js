@@ -45,15 +45,16 @@ export default class Wand extends Phaser.GameObjects.Graphics {
     }
 
     initializeParticles() {
-        this.particles = this.scene.add.particles(this.x, this.y, 'spark-y', {
+        this.particles = this.scene.add.particles(0, 0, 'spark-y', {
             speed: { min: 10, max: 300 },
             lifespan: { min: 600, max: 800 },
             scale: { start: 0.08, end: 0 },
             quantity: -1,
             angle: { min: 0, max: 360 },
-            blendMode: 'SCREEN',
+            blendMode: 'SCREEN'
         });
         this.particles.setDepth(2);
+        this.particles.startFollow(this, 0, 0);
     }
 
     setupCleanup() {

@@ -56,19 +56,20 @@ export class Preloader extends Scene {
         this.load.image('p2-frame', 'items/p2.png');
         this.load.image('cage', 'items/cage.png');
 
-
         this.load.video('part1', 'video/part1.mp4', 'loadeddata');
         this.load.video('part2', 'video/part2.mp4', 'loadeddata');
         this.load.video('idle', 'video/idle.mp4', 'loadeddata');
         this.load.video('potion-demo', 'video/potion-demo.mp4', 'loadeddata');
         this.load.video('game-demo', 'video/game-demo.mp4', 'loadeddata');
         this.load.video('caught', 'video/caught.mp4', 'loadeddata');
-        this.load.video('wizard-win', 'video/wizard-win.mp4', 'loadeddata');   
+        this.load.video('wizard-win', 'video/wizard-win.mp4', 'loadeddata');
         this.load.video('mini-win', 'video/mini-win.mp4', 'loadeddata');
+
+        this.load.audio('winner', 'sounds/winner.mp3');
 
         //  this.load.glsl('wiggle', '/src/game/shaders/wiggle.frag');
     }
     create() {
-                this.scene.start('Idle');
+        this.scene.start('Idle');
     }
 }

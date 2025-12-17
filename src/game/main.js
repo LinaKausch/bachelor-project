@@ -8,7 +8,7 @@ import { Potions } from './scenes/Potions';
 import { AnimationTwo } from './scenes/AnimationTwo';
 import { Preloader } from './scenes/Preloader';
 import { AUTO, Game } from 'phaser';
-import { Input } from './utils/Input.js';
+import { Input, GameState } from './utils/Input.js';
 
 //  Find out more information about the Game Config at:
 //  https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
@@ -43,7 +43,7 @@ const StartGame = (parent) => {
     const samplePeriodMs = 500;
     const maxSamples = Math.ceil(timeoutMs / samplePeriodMs);
     const samples = [];
-    let stabilityStart = null; // timestamp when data became stable
+    let stabilityStart = null;
 
     const isButtonsInactive = () => (Input.btn1 === 0 && Input.btn2 === 0 && (Input.z === 0));
 
@@ -88,6 +88,7 @@ const StartGame = (parent) => {
 
 
                 if (!game.scene.isActive('Idle')) {
+                    GameState.demoShown = true;
                     game.scene.getScenes(true).forEach(scene => {
                         if (scene.scene.key !== 'Idle') {
                             game.scene.stop(scene.scene.key);

@@ -7,3 +7,7 @@ export const Input = {
     accY: 128,
     z: 0
 };
+
+export const GameState = {
+    demoShown: false
+};

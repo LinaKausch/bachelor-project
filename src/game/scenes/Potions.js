@@ -37,6 +37,12 @@ export class Potions extends Scene {
 
         this.prevBtn1 = 0;
         this.prevBtn2 = 0;
+        this.p1Locked = false;
+        this.p2Locked = false;
+        this.p1LeftHeld = false;
+        this.p1RightHeld = false;
+        this.p2LeftHeld = false;
+        this.p2RightHeld = false;
 
         creatureAnimation(this);
         initWiggle(this);
@@ -91,7 +97,7 @@ export class Potions extends Scene {
             potion.on('pointerout', () => this.clearPowers(this.player1));
         });
 
- 
+
         //DEMO
         this.add.video(
             this.scale.width / 2,
@@ -101,7 +107,8 @@ export class Potions extends Scene {
 
         //PLAYERS
         this.players = [];
-        
+        this.statusTexts = [];
+
         const playerData = [
             { x: 350, label: 'Speler 1', name: 'Flapke' },
             ...(PlayersNum.players === 3 ? [{ x: this.scale.width - 350, label: 'Speler 2', name: 'Snufke' }] : [])

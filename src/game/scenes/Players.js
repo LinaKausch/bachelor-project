@@ -81,30 +81,30 @@ export class Players extends Scene {
         this.prevZ = 0;
 
         //WAND CONTROL ANIMATION
-        if (!this.anims.exists('wand-move')) {
-            this.anims.create({
-                key: 'wand-move',
-                frames: [
-                    { key: 'wand-move', frame: 0 },
-                    { key: 'wand-move', frame: 1 },
-                    { key: 'wand-move', frame: 2 },
-                    { key: 'wand-move', frame: 1 },
-                    { key: 'wand-move', frame: 0 }
-                ],
-                frameRate: 4,
-                repeat: -1
-            });
-        }
+        // if (!this.anims.exists('wand-move')) {
+        //     this.anims.create({
+        //         key: 'wand-move',
+        //         frames: [
+        //             { key: 'wand-move', frame: 0 },
+        //             { key: 'wand-move', frame: 1 },
+        //             { key: 'wand-move', frame: 2 },
+        //             { key: 'wand-move', frame: 1 },
+        //             { key: 'wand-move', frame: 0 }
+        //         ],
+        //         frameRate: 4,
+        //         repeat: -1
+        //     });
+        // }
 
-        const wand = this.add.sprite(
-            this.scale.width / 2,
-            this.scale.height / 2,
-            'wand-move'
-        );
-        wand.setScale(0.09);
-        wand.setOrigin(0.5);
-        wand.setDepth(50);
-        wand.play('wand-move');
+        // const wand = this.add.sprite(
+        //     this.scale.width / 2,
+        //     this.scale.height / 2,
+        //     'wand-move'
+        // );
+        // wand.setScale(0.09);
+        // wand.setOrigin(0.5);
+        // wand.setDepth(50);
+        // wand.play('wand-move');
 
 
         //WAND TARGET

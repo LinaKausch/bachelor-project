@@ -11,7 +11,7 @@ export class AnimationTwo extends Scene {
             this.scale.height / 2,
             'part2'
         );
-        video.play();
+        video.setMute(false).play();
 
         // video size 3840 x 2160
         const targetHeight = this.scale.height / 8;

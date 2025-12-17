@@ -11,8 +11,7 @@ export class AnimationOne extends Scene {
             this.scale.height / 2,
             'part1'
         );
-
-        video.play();
+        video.setMute(false).play();
         const targetHeight = this.scale.height / 8;
         const ratio = video.width / video.height;
         video.setDisplaySize(targetHeight * ratio, targetHeight);

@@ -11,14 +11,19 @@ import { glowOn, glowOff } from '../powers/Glow.js';
 import { growOn, growOff } from '../powers/Grow.js';
 import { colorOn, colorOff } from '../powers/Color.js';
 import { Input } from '../utils/Input.js';
-import { ChosenPowers } from '../utils/ChosenPowers.js';
+import { ChosenPowers} from '../utils/ChosenPowers.js';
 import { PlayersNum } from '../utils/PlayersNum.js';
 import TimerBar from '../utils/TimerBar.js';
+import { GameState } from '../utils/Input.js';
 
 
 export class Game extends Scene {
     constructor() {
         super('Game');
+    }
+
+    init(data) {
+        this.skipIntro = data?.skipIntro || false;
     }
 
     create() {
@@ -31,28 +36,50 @@ export class Game extends Scene {
         creatureAnimation(this);
         initWiggle(this);
 
-        this.gameOn = true;
+        this.gameOn = GameState.demoShown;
         this.player1Found = false;
         this.player2Found = false;
 
         //DEMO
-        const demo = this.add.video(
-            this.scale.width / 2,
-            this.scale.height - 90,
-            'game-demo'
-        );
+        if (!GameState.demoShown) {
+            GameState.demoShown = true;
+            const tintRect = this.add.rectangle(
+                0, 0,
+                this.scale.width,
+                this.scale.height,
+                0x000000,
+                0.7
+            ).setOrigin(0).setDepth(100);
 
-        demo
-            .setOrigin(0.5)
-            .setScale(0.7)
-            .setDepth(5)
-            .setMute(true)
-            .play();
+            const demo = this.add.video(
+                this.scale.width / 2,
+                this.scale.height / 2,
+                'game-demo'
+            );
 
-        this.time.delayedCall(3500, () => {
-            demo.stop();
-            demo.destroy();
-        });
+            demo
+                .setOrigin(0.5)
+                .setScale(1)
+                .setDepth(101)
+                .setMute(true)
+                .play();
+
+            demo.once('complete', () => {
+                this.tweens.add({
+                    targets: [demo, tintRect],
+                    alpha: 0,
+                    duration: 500,
+                    ease: 'Power2.inOut',
+                    onComplete: () => {
+                        demo.destroy();
+                        tintRect.destroy();
+                        this.gameOn = true;
+                        this.timer.start();
+                    }
+                });
+            });
+        }
+
         //PLAYERS
         const creatureCount = PlayersNum.players === 3 ? 2 : 1;
         this.playerCounter = new PlayerCounter(this, creatureCount);
@@ -133,7 +160,10 @@ export class Game extends Scene {
         const timerDuration = PlayersNum.players === 3 ? 50 : 30;
         this.timer = new Timer(timerDuration);
         this.timerBar = new TimerBar(this, this.timer, { direction: 'vertical' });
-        this.timer.start();
+        
+        if (this.skipIntro || GameState.demoShown) {
+            this.timer.start();
+        }
     }
 
     checkWandHit(player) {

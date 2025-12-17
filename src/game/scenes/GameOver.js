@@ -16,24 +16,25 @@ export class GameOver extends Scene {
         const centerX = this.scale.width / 2;
         const centerY = this.scale.height / 2;
 
-        // TITLE
-        this.add.text(centerX, 120, 'Game Over', {
-            fontFamily: '"Nova Square", sans-serif',
-            fontSize: 60,
-            color: '#ffffff',
-            stroke: '#000000',
-            strokeThickness: 6
-        }).setOrigin(0.5);
+        // MUSIC
+        this.music = this.sound.add('winner', { loop: true, volume: 1 });
+        this.music.play();
 
         //RESULT
         this.showResultScreen();
         this.setupWandInput();
+        
+        const buttonY = this.result === 'wizard' ? centerY - 100 : centerY + 200;
+        
         this.restartButton = new Button(this, {
             x: centerX,
-            y: centerY + 200,
+            y: buttonY,
             width: 400,
             label: 'START OPNIEUW',
-            onClick: () => this.scene.start('Potions')
+            onClick: () => {
+                this.music.stop();
+                this.scene.start('Potions');
+            }
         });
     }
 
@@ -67,7 +68,7 @@ export class GameOver extends Scene {
         if (screenFn) screenFn();
     }
 
-    createResultVideo(videoKey, title, titleColor = '#c685ffff') {
+    createResultVideo(videoKey) {
         const centerX = this.scale.width / 2;
         const centerY = this.scale.height / 2;
         const targetHeight = this.scale.height / 8;
@@ -76,13 +77,6 @@ export class GameOver extends Scene {
         const ratio = this.video.width / this.video.height;
         this.video.setDisplaySize(targetHeight * ratio, targetHeight);
 
-        this.add.text(centerX, 100, title, {
-            fontFamily: 'Arial Black',
-            fontSize: 72,
-            color: titleColor,
-            stroke: '#000000',
-            strokeThickness: 8
-        }).setOrigin(0.5);
     }
 
     update(time, delta) {
@@ -91,12 +85,12 @@ export class GameOver extends Scene {
     }
 
     showWizardWins() {
-        this.createResultVideo('wizard-win', 'Tovenaar Wint!');
+        this.createResultVideo('wizard-win');
     }
     showSingleEscape() {
-        this.createResultVideo('mini-win', 'Wezens Winnen!');
+        this.createResultVideo('mini-win');
     }
     showBothEscape() {
-        this.createResultVideo('mini-win', 'Wezens Winnen!');
+        this.createResultVideo('mini-win');
     }
 }

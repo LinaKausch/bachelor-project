@@ -25,13 +25,6 @@ export class Idle extends Scene {
             this.resize(width, height);
         });
 
-        // TITLE
-        this.title = this.add.text(centerX, 190, 'Mistique Minis', {
-            fontFamily: '"Nova Square", sans-serif',
-            fontSize: '130px',
-            color: '#fbf9fcff',
-        }).setOrigin(0.5);
-
         // BUTTON
         this.startButton = new Button(this, {
             x: centerX,
@@ -41,30 +34,30 @@ export class Idle extends Scene {
         });
 
         //WAND ANIMATION
-        if (!this.anims.exists('wand-move')) {
-            this.anims.create({
-                key: 'wand-move',
-                frames: [
-                    { key: 'wand-move', frame: 0 },
-                    { key: 'wand-move', frame: 1 },
-                    { key: 'wand-move', frame: 2 },
-                    { key: 'wand-move', frame: 1 },
-                    { key: 'wand-move', frame: 0 }
-                ],
-                frameRate: 4,
-                repeat: -1
-            });
-        }
-        const wand = this.add.sprite(
-            this.scale.width / 2,
-            this.scale.height / 2,
-            'wand-move'
-        );
-        wand.setScale(0.09);
-        wand.setOrigin(0.5);
-        wand.setDepth(50);
+        // if (!this.anims.exists('wand-move')) {
+        //     this.anims.create({
+        //         key: 'wand-move',
+        //         frames: [
+        //             { key: 'wand-move', frame: 0 },
+        //             { key: 'wand-move', frame: 1 },
+        //             { key: 'wand-move', frame: 2 },
+        //             { key: 'wand-move', frame: 1 },
+        //             { key: 'wand-move', frame: 0 }
+        //         ],
+        //         frameRate: 4,
+        //         repeat: -1
+        //     });
+        // }
+        // const wand = this.add.sprite(
+        //     this.scale.width / 2,
+        //     this.scale.height / 2,
+        //     'wand-move'
+        // );
+        // wand.setScale(0.09);
+        // wand.setOrigin(0.5);
+        // wand.setDepth(50);
 
-        wand.play('wand-move');
+        // wand.play('wand-move');
 
         // WAND CONTROL
         this.wand = new Wand(this);
