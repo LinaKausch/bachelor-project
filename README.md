@@ -3,6 +3,8 @@
 Mistique Minis is a game created by three Digital Design and Development students as a bachelor project for ***JEF (Jeugdfilmfestival Antwerpen)***. The game was originally designed as an **audiovisual installation** for the festival and
 is built to be played on a **1920×1080 screen** using physical controllers.
 
+![Gameplay screenshot](./installation.png)
+
 ## Game Overview
 
 Mistique Minis is a **2D multiplayer game** built with **Phaser** and **Vite**.
