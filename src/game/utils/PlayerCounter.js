@@ -13,7 +13,6 @@ export default class PlayerCounter {
         for (let i = 0; i < players; i++) {
             const x = startX + i * 150;
 
-
             const face = scene.add.image(x, y, `profile${i + 1}`);
             face.setOrigin(0.5);
             face.setScale(1.1);
@@ -67,6 +66,7 @@ export default class PlayerCounter {
                 if (cd.level <= 0) {
                     cd.level = 0;
                     cd.state = 'recharging';
+                    this.scene.sound.play('antipower-on', { volume: 1 });
                 }
             }
 
@@ -103,6 +103,8 @@ export default class PlayerCounter {
         cd.drainTotal = drainSeconds;
         cd.rechargeTotal = rechargeSeconds;
         cd.level = 1;
+
+        this.scene.sound.play('antipower-off', { volume: 1 });
     }
 
     greyOutProfile(index) {

@@ -15,7 +15,8 @@ export default class Wand extends Phaser.GameObjects.Graphics {
         this.shootDelay = 800;
         this.particleCount = 30;
 
-        this.accCenter = -25;
+        this.accCenterX = -25;
+        this.accCenterY = 90;
         this.accRangeX = 100;
         this.accRangeY = 60;
         this.smoothFactor = 0.15;
@@ -82,12 +83,13 @@ export default class Wand extends Phaser.GameObjects.Graphics {
         const { accX, accY } = Input;
         if (accX === undefined || accY === undefined) return;
 
-        const center = this.accCenter;
+        const centerX = this.accCenterX;
+        const centerY = this.accCenterY;
         const rangeX = this.accRangeX;
         const rangeY = this.accRangeY;
 
-        const rawX = Phaser.Math.Clamp(accX - center, -rangeX, rangeX);
-        const rawY = Phaser.Math.Clamp(accY - center, -rangeY, rangeY);
+        const rawX = Phaser.Math.Clamp(accX - centerX, -rangeX, rangeX);
+        const rawY = Phaser.Math.Clamp(accY - centerY, -rangeY, rangeY);
 
         this.smoothX += (rawX - this.smoothX) * this.smoothFactor;
         this.smoothY += (rawY - this.smoothY) * this.smoothFactor;
@@ -113,6 +115,7 @@ export default class Wand extends Phaser.GameObjects.Graphics {
         if (cast && time > this.lastShot + this.shootDelay) {
             this.particles.explode(30, this.x, this.y);
             this.lastShot = time;
+            this.scene.sound.play('wand-sound', { volume: 1 });
         }
     }
 }

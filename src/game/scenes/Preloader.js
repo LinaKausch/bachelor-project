@@ -66,8 +66,11 @@ export class Preloader extends Scene {
         this.load.video('mini-win', 'video/mini-win.mp4', 'loadeddata');
 
         this.load.audio('winner', 'sounds/winner.mp3');
-
-        //  this.load.glsl('wiggle', '/src/game/shaders/wiggle.frag');
+        this.load.audio('wand-sound', 'sounds/wand.mp3');
+        this.load.audio('potion-selection', 'sounds/potion-selection.mp3');
+        this.load.audio('antipower-off', 'sounds/antipower-off.mp3');
+        this.load.audio('antipower-on', 'sounds/antipower-on.mp3');
+        this.load.audio('game-music', 'sounds/game-music.mp3');
     }
     create() {
         this.scene.start('Idle');

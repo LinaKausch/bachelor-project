@@ -39,7 +39,7 @@ const StartGame = (parent) => {
 
     const game = new Game({ ...config, parent });
 
-    const timeoutMs = 20000;
+    const timeoutMs = 30000;
     const samplePeriodMs = 500;
     const maxSamples = Math.ceil(timeoutMs / samplePeriodMs);
     const samples = [];
@@ -88,7 +88,7 @@ const StartGame = (parent) => {
 
 
                 if (!game.scene.isActive('Idle')) {
-                    GameState.demoShown = true;
+                    GameState.demoShown = false;
                     game.scene.getScenes(true).forEach(scene => {
                         if (scene.scene.key !== 'Idle') {
                             game.scene.stop(scene.scene.key);

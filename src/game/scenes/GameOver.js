@@ -2,6 +2,7 @@ import { Scene } from 'phaser';
 import Wand from '../prefabs/wand.js';
 import Button from '../utils/Button.js';
 import { Serial } from '../utils/Serial.js';
+import { GameState } from '../utils/Input.js';
 
 export class GameOver extends Scene {
     constructor() {
@@ -17,22 +18,28 @@ export class GameOver extends Scene {
         const centerY = this.scale.height / 2;
 
         // MUSIC
-        this.music = this.sound.add('winner', { loop: true, volume: 1 });
+        this.music = this.sound.add('winner', { loop: false, volume: 1 });
         this.music.play();
+        this.events.once('shutdown', () => {
+            if (this.music) this.music.stop();
+            this.sound.stopByKey('game-music');
+        });
 
         //RESULT
         this.showResultScreen();
         this.setupWandInput();
-        
-        const buttonY = this.result === 'wizard' ? centerY - 100 : centerY + 200;
-        
+
+        const buttonY = this.result === 'wizard' ? centerY - 50 : centerY + 250;
+
         this.restartButton = new Button(this, {
             x: centerX,
             y: buttonY,
             width: 400,
             label: 'START OPNIEUW',
             onClick: () => {
-                this.music.stop();
+                if (this.music) this.music.stop();
+                this.sound.stopByKey('game-music');
+                GameState.demoShown = true;
                 this.scene.start('Potions');
             }
         });

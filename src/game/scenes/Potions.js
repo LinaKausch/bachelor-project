@@ -238,6 +238,7 @@ export class Potions extends Scene {
             this[leftHeldKey] = true;
             this.previewPower(player, this[selectedKey]);
             this.updateBorders();
+            this.sound.play('potion-selection', { volume: 0.5 });
         }
         if (direction !== 'left') this[leftHeldKey] = false;
 
@@ -246,6 +247,7 @@ export class Potions extends Scene {
             this[rightHeldKey] = true;
             this.previewPower(player, this[selectedKey]);
             this.updateBorders();
+            this.sound.play('potion-selection', { volume: 0.5 });
         }
         if (direction !== 'right') this[rightHeldKey] = false;
     }

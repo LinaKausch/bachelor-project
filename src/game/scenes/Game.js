@@ -11,7 +11,7 @@ import { glowOn, glowOff } from '../powers/Glow.js';
 import { growOn, growOff } from '../powers/Grow.js';
 import { colorOn, colorOff } from '../powers/Color.js';
 import { Input } from '../utils/Input.js';
-import { ChosenPowers} from '../utils/ChosenPowers.js';
+import { ChosenPowers } from '../utils/ChosenPowers.js';
 import { PlayersNum } from '../utils/PlayersNum.js';
 import TimerBar from '../utils/TimerBar.js';
 import { GameState } from '../utils/Input.js';
@@ -33,9 +33,14 @@ export class Game extends Scene {
         this.bg.displayHeight = this.scale.height;
         this.bg.setDepth(-10);
 
+        this.transitionScheduled = false;
+
         creatureAnimation(this);
         initWiggle(this);
 
+        this.playSound = this.sound.add('game-music', { loop: true, volume: 0.5 });
+        this.playSound.play();
+        
         this.gameOn = GameState.demoShown;
         this.player1Found = false;
         this.player2Found = false;
@@ -106,8 +111,8 @@ export class Game extends Scene {
         this.prevYellow = 0;
 
         // ANTIPOWERS
-        this.applyChosenPower(this.player1, ChosenPowers.p1);
-        this.applyChosenPower(this.player2, ChosenPowers.p2);
+        this.applyPower(this.player1, ChosenPowers.p1);
+        this.applyPower(this.player2, ChosenPowers.p2);
 
         this.tempOff = (player, offFn, onFn, seconds, cooldown) => {
             if (player._isOnCooldown) return;
@@ -160,8 +165,8 @@ export class Game extends Scene {
         const timerDuration = PlayersNum.players === 3 ? 50 : 30;
         this.timer = new Timer(timerDuration);
         this.timerBar = new TimerBar(this, this.timer, { direction: 'vertical' });
-        
-        if (this.skipIntro || GameState.demoShown) {
+
+        if (this.skipIntro) {
             this.timer.start();
         }
     }
@@ -187,10 +192,10 @@ export class Game extends Scene {
 
 
         if (this.blueBtn === 1 && this.prevBlue === 0) {
-            this.activatePowerForPlayer(1, ChosenPowers.p1);
+            this.activatePower(1, ChosenPowers.p1);
         }
         if (this.yellowBtn === 1 && this.prevYellow === 0) {
-            this.activatePowerForPlayer(2, ChosenPowers.p2);
+            this.activatePower(2, ChosenPowers.p2);
         }
         this.prevBlue = this.blueBtn;
         this.prevYellow = this.yellowBtn;
@@ -225,8 +230,10 @@ export class Game extends Scene {
             this.player2Found = true;
         }
 
-        if (this.player1Found && this.player2Found) {
-            this.time.delayedCall(800, () => {
+        if (!this.transitionScheduled && this.player1Found && this.player2Found) {
+            this.transitionScheduled = true;
+            // Allow caught animation to finish before transitioning
+            this.time.delayedCall(3500, () => {
                 this.scene.start("GameOver", { result: "wizard" });
             });
         }
@@ -246,7 +253,7 @@ export class Game extends Scene {
         this.wand.update(time, delta);
     }
 
-    applyChosenPower(player, potionIndex) {
+    applyPower(player, potionIndex) {
         if (potionIndex === null) return;
 
         const POWER_MAP = [
@@ -262,7 +269,7 @@ export class Game extends Scene {
         }
     }
 
-    activatePowerForPlayer(playerNum, potionIndex) {
+    activatePower(playerNum, potionIndex) {
         const player = playerNum === 1 ? this.player1 : this.player2;
         const power = [
             { on: glowOn, off: glowOff },
@@ -315,18 +322,26 @@ export class Game extends Scene {
         const p1Alive = !this.player1Found;
         const p2Alive = PlayersNum.players === 3 ? !this.player2Found : false;
 
+        const delayMs = 50000;
+
         if (!p1Alive && !p2Alive) {
-            this.scene.start("GameOver", { result: "wizard" });
+            this.time.delayedCall(delayMs, () => {
+                this.scene.start("GameOver", { result: "wizard" });
+            });
             return;
         }
 
         if (p1Alive !== p2Alive) {
-            this.scene.start("GameOver", { result: "single" });
+            this.time.delayedCall(delayMs, () => {
+                this.scene.start("GameOver", { result: "single" });
+            });
             return;
         }
 
         if (p1Alive && p2Alive) {
-            this.scene.start("GameOver", { result: "both" });
+            this.time.delayedCall(delayMs, () => {
+                this.scene.start("GameOver", { result: "both" });
+            });
             return;
         }
     }
